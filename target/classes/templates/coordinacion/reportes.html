@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Reportes - Coordinación</title>
+    <link th:href="@{/css/uts-theme.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <div class="main-layout">
+        <div th:replace="fragments/sidebar :: sidebar"></div>
+        
+        <main class="main-content">
+            <!-- Header -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h1 class="card-title">📋 Reportes de Coordinación</h1>
+                    <p>Generar reportes estadísticos y análisis académicos</p>
+                </div>
+            </div>
+
+            <!-- Estadísticas Rápidas -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🎓</div>
+                    <div class="stat-number" th:text="${totalEstudiantes}">0</div>
+                    <div class="stat-label">Total Estudiantes</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-number" th:text="${totalResultados}">0</div>
+                    <div class="stat-label">Resultados Registrados</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-number" th:text="${totalBeneficios}">0</div>
+                    <div class="stat-label">Beneficios Asignados</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-number" th:text="${beneficiosActivos}">0</div>
+                    <div class="stat-label">Beneficios Activos</div>
+                </div>
+            </div>
+
+            <!-- Filtros de Reportes -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h2 class="card-title">🔍 Configurar Reporte</h2>
+                </div>
+                <div class="card-body">
+                    <form id="reporteForm" th:action="@{/coordinacion/reportes/generar}" method="post">
+                        <div class="filters-grid">
+                            <div class="form-group">
+                                <label class="form-label">Tipo de Reporte</label>
+                                <select class="form-control" name="tipoReporte" id="tipoReporte" required>
+                                    <option value="">Seleccionar tipo de reporte</option>
+                                    <option value="rendimiento">Reporte de Rendimiento</option>
+                                    <option value="estudiantes">Reporte de Estudiantes</option>
+                                    <option value="resultados">Reporte de Resultados</option>
+                                    <option value="beneficios">Reporte de Beneficios</option>
+                                    <option value="consolidado">Reporte Consolidado</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Programa Académico</label>
+                                <select class="form-control" name="programa" id="programa">
+                                    <option value="">Todos los programas</option>
+                                    <option th:each="programa : ${programas}" 
+                                            th:value="${programa}" 
+                                            th:text="${programa}"></option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Año</label>
+                                <select class="form-control" name="anio" id="anio">
+                                    <option value="">Todos los años</option>
+                                    <option th:each="anio : ${anios}" 
+                                            th:value="${anio}" 
+                                            th:text="${anio}"></option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Formato</label>
+                                <select class="form-control" name="formato" id="formato" required>
+                                    <option value="html">Vista en Pantalla</option>
+                                    <option value="pdf">PDF</option>
+                                    <option value="excel">Excel</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="text-center mt-2">
+                            <button type="submit" class="btn btn-primary" id="btnGenerarReporte">
+                                <i class="fas fa-download"></i> Generar Reporte
+                            </button>
+                            <button type="button" class="btn btn-outline" onclick="reportesManager.mostrarReporteEnPantalla()">
+                                <i class="fas fa-eye"></i> Ver en Pantalla
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Área de Visualización de Reportes -->
+            <div id="areaReporte" class="uts-card mt-2" style="display: none;">
+                <div class="card-header">
+                    <h2 class="card-title" id="tituloReporte">📈 Reporte Generado</h2>
+                    <button class="btn btn-outline btn-sm" onclick="reportesManager.cerrarReporte()">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                </div>
+                <div class="card-body" id="contenidoReporte">
+                    <!-- El contenido del reporte se cargará aquí dinámicamente -->
+                </div>
+            </div>
+
+            <!-- Gráficos y Estadísticas -->
+            <div class="uts-card mt-2">
+                <div class="card-header">
+                    <h2 class="card-title">📊 Estadísticas en Tiempo Real</h2>
+                </div>
+                <div class="card-body">
+                    <div class="charts-grid">
+                        <div class="chart-container">
+                            <canvas id="chartBeneficios"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chartResultados"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reportes Predefinidos - MODIFICADO -->
+            <div class="menu-grid">
+                <!-- ✅ ELIMINADO: Rendimiento por Programa -->
+                <!-- ✅ ELIMINADO: Estadísticas Estudiantiles -->
+                
+                <a th:href="@{/coordinacion/beneficios}" class="menu-card">
+                    <div class="menu-icon">💰</div>
+                    <h3>Beneficios Asignados</h3>
+                    <p>Gestionar y ver beneficios académicos asignados</p>
+                </a>
+                
+                <a th:href="@{/coordinacion/resultados}" class="menu-card">
+                    <div class="menu-icon">📊</div>
+                    <h3>Resultados Pruebas</h3>
+                    <p>Consultar resultados de pruebas Saber Pro/T&T</p>
+                </a>
+                
+                <!-- ✅ ELIMINADO: Reporte Semestral -->
+                <!-- ✅ ELIMINADO: Egresados -->
+            </div>
+
+            <!-- Reportes Recientes -->
+            <div class="uts-card mt-2">
+                <div class="card-header">
+                    <h2 class="card-title">🕒 Reportes Generados Recientemente</h2>
+                </div>
+                <div class="card-body">
+                    <div class="activity-list" id="listaReportesRecientes">
+                        <!-- Los reportes recientes se cargarán dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/common.js}"></script>
+    <script th:src="@{/js/reportes.js}"></script>
+</body>
+
+<style>
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        text-align: center;
+        border-left: 4px solid var(--verde-lima);
+    }
+    
+    .stat-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: var(--texto-oscuro);
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: var(--texto-claro);
+        font-size: 0.9rem;
+    }
+    
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+        margin-top: 1rem;
+    }
+    
+    .chart-container {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        height: 300px;
+    }
+    
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--gris-claro);
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+    
+    .activity-item:hover {
+        background: var(--gris-medio);
+        transform: translateX(5px);
+    }
+    
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+    
+    .activity-content {
+        flex: 1;
+    }
+    
+    .activity-content p {
+        margin: 0;
+        color: var(--texto-oscuro);
+    }
+    
+    .activity-time {
+        font-size: 0.8rem;
+        color: var(--texto-claro);
+    }
+    
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .menu-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        text-align: center;
+        text-decoration: none;
+        color: inherit;
+        transition: transform 0.3s, box-shadow 0.3s;
+        border: 2px solid transparent;
+        cursor: pointer;
+        display: block; /* Para que funcione como enlace */
+    }
+    
+    .menu-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        border-color: var(--verde-lima);
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .menu-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .menu-card h3 {
+        margin: 0 0 0.5rem 0;
+        color: var(--texto-oscuro);
+    }
+    
+    .menu-card p {
+        margin: 0;
+        color: var(--texto-claro);
+        font-size: 0.9rem;
+    }
+    
+    .reporte-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+    }
+    
+    .reporte-table th,
+    .reporte-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    .reporte-table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+    
+    .reporte-section {
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .reporte-section h3 {
+        color: var(--texto-oscuro);
+        margin-bottom: 1rem;
+        border-bottom: 2px solid var(--verde-lima);
+        padding-bottom: 0.5rem;
+    }
+</style>
+</html>

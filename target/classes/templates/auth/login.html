@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema Saber Pro UTS</title>
+    <link th:href="@{/css/uts-theme.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --verde-lima: #bed52f;
+            --morado: #7c2a8e;
+            --gris-azulado: #29313c;
+            --azul-profundo: #0b4a75;
+            --blanco: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                        url('../images/fondoBanner.jpg') center/cover no-repeat;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            display: flex;
+            flex-wrap: wrap;
+            width: 95%;
+            max-width: 1200px;
+            height: 85vh;
+            background: var(--blanco);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .login-left {
+            flex: 1 1 45%;
+            background: linear-gradient(135deg, rgba(41, 49, 60, 0.8), rgba(41, 49, 60, 0.9)), 
+                        url('../images/fondoBanner.jpg') center/cover no-repeat;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .login-left-content {
+            color: var(--blanco);
+            text-align: center;
+            z-index: 2;
+        }
+
+        .login-left-content img {
+            width: 150px;
+            margin-bottom: 30px;
+            filter: brightness(1.2);
+        }
+
+        .login-left-content h2 {
+            font-weight: 600;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            line-height: 1.3;
+        }
+
+        .login-left-content p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .institution-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--verde-lima);
+            margin-top: 20px;
+        }
+
+        .login-right {
+            flex: 1 1 55%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 40px;
+            background: var(--blanco);
+        }
+
+        .login-form {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-form h3 {
+            color: var(--gris-azulado);
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        .form-subtitle {
+            text-align: center;
+            color: var(--morado);
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--gris-azulado);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--verde-lima);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(190, 213, 47, 0.1);
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--gris-azulado);
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 5px;
+            transition: color 0.3s;
+        }
+
+        .toggle-password:hover {
+            color: var(--verde-lima);
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, var(--verde-lima) 0%, var(--morado) 100%);
+            border: none;
+            color: var(--blanco);
+            border-radius: 10px;
+            padding: 15px;
+            width: 100%;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: all 0.3s;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(190, 213, 47, 0.4);
+        }
+
+        /* Alertas mejoradas */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-weight: 500;
+            text-align: center;
+            border: none;
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #51cf66, #40c057);
+            color: white;
+        }
+
+        /* Cuentas de prueba */
+        .test-accounts {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid var(--verde-lima);
+        }
+
+        .test-accounts h4 {
+            color: var(--gris-azulado);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .account-item {
+            background: var(--blanco);
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+        }
+
+        .account-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .account-role {
+            font-weight: 600;
+            color: var(--morado);
+        }
+
+        .account-creds {
+            color: var(--gris-azulado);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .login-container {
+                flex-direction: column;
+                height: auto;
+                max-width: 500px;
+            }
+            .login-left, .login-right {
+                flex: 1 1 100%;
+            }
+            .login-left {
+                padding: 40px 20px;
+                min-height: 300px;
+            }
+            .login-right {
+                padding: 40px 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .login-container {
+                width: 100%;
+            }
+            .login-left-content h2 {
+                font-size: 1.6rem;
+            }
+            .login-form h3 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <!-- Panel izquierdo con imagen y información UTS -->
+        <div class="login-left">
+            <div class="login-left-content">
+                <img th:src="@{/images/logo-uts.png}" alt="Logo UTS">
+                <h2>Sistema de Gestión Saber Pro/T&T</h2>
+                <p>Gestión Integral de Resultados e Incentivos Académicos</p>
+                <div class="institution-name">Unidades Tecnológicas de Santander</div>
+            </div>
+        </div>
+
+        <!-- Panel derecho con formulario -->
+        <div class="login-right">
+            <form class="login-form" method="post" th:action="@{/login}">
+                <h3>Iniciar Sesión</h3>
+                <div class="form-subtitle">Acceso al Sistema</div>
+
+                <!-- Mensajes de error -->
+                <div th:if="${param.error}" class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Usuario o contraseña incorrectos
+                </div>
+                
+                <div th:if="${param.logout}" class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    Sesión cerrada correctamente
+                </div>
+
+                <!-- Campos del formulario -->
+                <div class="form-group">
+                    <label for="username" class="form-label">
+                        <i class="fas fa-user"></i> Usuario
+                    </label>
+                    <input type="text" id="username" name="username" class="form-control" 
+                           placeholder="Ingresa tu usuario" required th:value="${param.username}">
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">
+                        <i class="fas fa-lock"></i> Contraseña
+                    </label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" name="password" class="form-control" 
+                               placeholder="Ingresa tu contraseña" required>
+                        <button type="button" class="toggle-password" id="togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt"></i> Ingresar al Sistema
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Función para mostrar/ocultar contraseña
+        document.addEventListener('DOMContentLoaded', function() {
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+            
+            if (togglePassword && passwordInput) {
+                togglePassword.addEventListener('click', function() {
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    
+                    const icon = this.querySelector('i');
+                    if (type === 'password') {
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    } else {
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    }
+                });
+            }
+
+            // Auto-focus en el campo de usuario si hay error
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('error')) {
+                setTimeout(() => {
+                    const usernameInput = document.getElementById('username');
+                    if (usernameInput) usernameInput.focus();
+                }, 300);
+            }
+        });
+    </script>
+</body>
+</html>

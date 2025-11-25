@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Configuración - Admin Saber Pro UTS</title>
+    <link th:href="@{/css/uts-theme.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <div class="main-layout">
+        <div th:replace="fragments/sidebar :: sidebar"></div>
+        
+        <main class="main-content">
+            <!-- Header de la página -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h1 class="card-title">⚙️ Configuración del Sistema</h1>
+                    <p>Configurar parámetros y opciones del sistema Saber Pro/T&T</p>
+                </div>
+            </div>
+
+            <!-- Configuraciones Generales -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h2 class="card-title">📋 Configuraciones Generales</h2>
+                </div>
+                
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label class="form-label">Nombre de la Institución</label>
+                        <input type="text" class="form-control" value="Unidades Tecnológicas de Santander">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Año Académico Actual</label>
+                        <input type="text" class="form-control" value="2024">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Límite de Estudiantes</label>
+                        <input type="number" class="form-control" value="5000">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Nota Mínima Aprobatoria</label>
+                        <input type="number" class="form-control" value="60" step="0.1">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuración de Pruebas -->
+            <div class="uts-card mt-2">
+                <div class="card-header">
+                    <h2 class="card-title">📝 Configuración de Pruebas</h2>
+                </div>
+                
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label class="form-label">Duración Máxima Prueba (minutos)</label>
+                        <input type="number" class="form-control" value="180">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Número de Preguntas</label>
+                        <input type="number" class="form-control" value="100">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Puntaje Máximo</label>
+                        <input type="number" class="form-control" value="500">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Intentos Permitidos</label>
+                        <input type="number" class="form-control" value="3">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuración de Notificaciones -->
+            <div class="uts-card mt-2">
+                <div class="card-header">
+                    <h2 class="card-title">🔔 Configuración de Notificaciones</h2>
+                </div>
+                
+                <div class="config-list">
+                    <div class="config-item">
+                        <div class="config-info">
+                            <h4>Notificaciones por Email</h4>
+                            <p>Enviar notificaciones por correo electrónico</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="config-item">
+                        <div class="config-info">
+                            <h4>Recordatorios de Pruebas</h4>
+                            <p>Enviar recordatorios antes de las pruebas</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="config-item">
+                        <div class="config-info">
+                            <h4>Notificaciones de Resultados</h4>
+                            <p>Notificar cuando estén disponibles los resultados</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="config-item">
+                        <div class="config-info">
+                            <h4>Alertas de Seguridad</h4>
+                            <p>Notificar sobre actividades sospechosas</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="uts-card mt-2">
+                <div class="d-flex justify-between align-center">
+                    <div>
+                        <h3 class="card-title">Guardar Cambios</h3>
+                        <p class="mb-0">Aplicar las configuraciones modificadas</p>
+                    </div>
+                    <div class="d-flex gap-1">
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Restablecer
+                        </button>
+                        <button class="btn btn-primary">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+</body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentPath = window.location.pathname;
+        const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
+        
+        navLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+            }
+        });
+    });
+</script>
+
+<style>
+    .config-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .config-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .config-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: var(--gris-claro);
+        border-radius: 8px;
+    }
+    
+    .config-info h4 {
+        margin: 0 0 0.5rem 0;
+        color: var(--texto-oscuro);
+    }
+    
+    .config-info p {
+        margin: 0;
+        color: var(--texto-claro);
+        font-size: 0.9rem;
+    }
+    
+    /* Switch Toggle */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+    
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 34px;
+    }
+    
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+        background-color: var(--verde-lima);
+    }
+    
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+    
+    .gap-1 {
+        gap: 1rem;
+    }
+</style>
+</html>

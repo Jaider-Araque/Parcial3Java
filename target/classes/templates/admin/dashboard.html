@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - Saber Pro UTS</title>
+    <link th:href="@{/css/uts-theme.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 para confirmaciones bonitas -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    
+    <div class="main-layout">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <main class="main-content">
+            <div class="uts-card">
+                <div class="card-header">
+                    <h1 class="card-title">🛠️ Panel de Administración</h1>
+                    <p>Bienvenido al sistema de gestión Saber Pro/T&T de las Unidades Tecnológicas de Santander</p>
+                </div>
+                
+                <!-- Stats Grid - SIN ANIMACIONES, DATOS DIRECTOS -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-number" th:text="${totalUsuarios}">0</div>
+                        <div class="stat-label">Usuarios Registrados</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">🎓</div>
+                        <div class="stat-number" th:text="${estudiantesActivos}">0</div>
+                        <div class="stat-label">Estudiantes Activos</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-number" th:text="${resultadosCargados}">0</div>
+                        <div class="stat-label">Resultados Cargados</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-number" th:text="${beneficiosAsignados}">0</div>
+                        <div class="stat-label">Beneficios Asignados</div>
+                    </div>
+                </div>
+            
+                <div class="menu-grid">
+                    <a href="/admin/usuarios" class="menu-card">
+                        <div class="menu-icon">👥</div>
+                        <h3>Gestión de Usuarios</h3>
+                        <p>Administrar usuarios y roles del sistema</p>
+                    </a>
+                    
+                    <a href="/admin/reportes" class="menu-card">
+                        <div class="menu-icon">📊</div>
+                        <h3>Reportes del Sistema</h3>
+                        <p>Generar reportes estadísticos y análisis</p>
+                    </a>
+                    
+                    <a href="/admin/configuracion" class="menu-card">
+                        <div class="menu-icon">⚙️</div>
+                        <h3>Configuración</h3>
+                        <p>Configurar parámetros del sistema</p>
+                    </a>
+                    
+                    <a href="/admin/seguridad" class="menu-card">
+                        <div class="menu-icon">🔒</div>
+                        <h3>Seguridad</h3>
+                        <p>Gestionar permisos y acceso</p>
+                    </a>
+                    
+                    <a href="/admin/auditoria" class="menu-card">
+                        <div class="menu-icon">📋</div>
+                        <h3>Auditoría</h3>
+                        <p>Ver logs y actividad del sistema</p>
+                    </a>
+                    
+                    <a href="/admin/backup" class="menu-card">
+                        <div class="menu-icon">🔄</div>
+                        <h3>Backup</h3>
+                        <p>Gestionar copias de seguridad</p>
+                    </a>
+                </div>
+
+                <!-- Sección adicional para mostrar más estadísticas si están disponibles -->
+                <div th:if="${totalUsuarios > 0}" class="additional-stats">
+                    <h3>📈 Resumen del Sistema</h3>
+                    <div class="stats-summary">
+                        <p><strong>Estado del Sistema:</strong> <span class="status-active">✅ Operativo</span></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <!-- Incluir el archivo común de JavaScript -->
+    <script th:src="@{/js/common.js}"></script>
+    
+</body>
+</html>

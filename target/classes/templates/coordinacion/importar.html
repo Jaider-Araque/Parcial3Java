@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Importar Resultados - Coordinación</title>
+    <link th:href="@{/css/uts-theme.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <div class="main-layout">
+        <div th:replace="fragments/sidebar :: sidebar"></div>
+        
+        <main class="main-content">
+            <!-- Header -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h1 class="card-title">📤 Importar Resultados de Pruebas</h1>
+                    <p>Importar archivos Excel con resultados de pruebas Saber Pro y Saber T&T</p>
+                </div>
+            </div>
+
+            <!-- Sección Saber PRO -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-graduation-cap text-primary"></i>
+                        🎓 Saber PRO
+                        <span class="badge badge-primary">Profesionales</span>
+                    </h3>
+                    <p>Importar resultados de pruebas para programas profesionales</p>
+                </div>
+                
+                <div class="card-body">
+                    <div class="instructions">
+                        <strong>📋 Instrucciones:</strong> Suba el archivo Excel con los resultados de Saber PRO
+                    </div>
+                    
+                    <div class="upload-area saber-pro-upload" onclick="document.getElementById('fileInputPro').click()">
+                        <div class="upload-content">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <h4>Haz clic para seleccionar archivo Saber PRO</h4>
+                            <p>Formatos aceptados: .xlsx, .xls</p>
+                        </div>
+                        <input type="file" id="fileInputPro" accept=".xlsx,.xls" style="display: none;">
+                    </div>
+                    
+                    <div id="fileInfoPro" class="file-info">
+                        <div class="file-details">
+                            <i class="fas fa-file-excel text-success"></i>
+                            <div>
+                                <strong>Archivo Saber PRO:</strong> 
+                                <span id="fileNamePro">-</span>
+                            </div>
+                        </div>
+                        <div class="file-actions">
+                            <button class="btn btn-primary" onclick="subirArchivo('PRO')">
+                                <i class="fas fa-upload"></i> Subir Archivo Saber PRO
+                            </button>
+                            <button class="btn btn-outline" onclick="cancelarArchivo('PRO')">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Saber TYT -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-book text-danger"></i>
+                        📚 Saber T&T
+                        <span class="badge badge-danger">Tecnológicos</span>
+                    </h3>
+                    <p>Importar resultados de pruebas para programas tecnológicos</p>
+                </div>
+                
+                <div class="card-body">
+                    <div class="instructions">
+                        <strong>📋 Instrucciones:</strong> Suba el archivo Excel con los resultados de Saber T&T
+                    </div>
+                    
+                    <div class="upload-area saber-tyt-upload" onclick="document.getElementById('fileInputTyt').click()">
+                        <div class="upload-content">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <h4>Haz clic para seleccionar archivo Saber T&T</h4>
+                            <p>Formatos aceptados: .xlsx, .xls</p>
+                        </div>
+                        <input type="file" id="fileInputTyt" accept=".xlsx,.xls" style="display: none;">
+                    </div>
+                    
+                    <div id="fileInfoTyt" class="file-info">
+                        <div class="file-details">
+                            <i class="fas fa-file-excel text-success"></i>
+                            <div>
+                                <strong>Archivo Saber T&T:</strong> 
+                                <span id="fileNameTyt">-</span>
+                            </div>
+                        </div>
+                        <div class="file-actions">
+                            <button class="btn btn-danger" onclick="subirArchivo('TYT')">
+                                <i class="fas fa-upload"></i> Subir Archivo Saber T&T
+                            </button>
+                            <button class="btn btn-outline" onclick="cancelarArchivo('TYT')">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controles del Sistema -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-cogs"></i>
+                        🔧 Controles del Sistema
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="controls-grid">
+                        <button class="btn btn-outline" onclick="probarEndpoint()">
+                            <i class="fas fa-plug"></i> Probar Conexión
+                        </button>
+                        <button class="btn btn-outline" onclick="verificarBD()">
+                            <i class="fas fa-database"></i> Verificar Base de Datos
+                        </button>
+                        <button class="btn btn-outline" onclick="limpiarLogs()">
+                            <i class="fas fa-broom"></i> Limpiar Logs
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logs del Sistema -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-terminal"></i>
+                        📝 Logs del Sistema
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="logs-container" id="logContainer">
+                        <div class="log-entry info">
+                            <span class="log-time">[19:59:41]</span>
+                            <span class="log-message">✅ Sistema de importación cargado</span>
+                        </div>
+                        <div class="log-entry info">
+                            <span class="log-time">[19:59:41]</span>
+                            <span class="log-message">🎓 Selecciona un archivo Saber PRO o Saber T&T para comenzar</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+    <script th:src="@{/js/common.js}"></script>
+</body>
+
+<style>
+    /* Estilos específicos para la página de importación */
+    .upload-area {
+        border: 2px dashed var(--gris-medio);
+        border-radius: 8px;
+        padding: 3rem 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: var(--gris-claro);
+        margin: 1.5rem 0;
+    }
+    
+    .saber-pro-upload:hover {
+        border-color: var(--azul-primario);
+        background: #ebf5fb;
+    }
+    
+    .saber-tyt-upload:hover {
+        border-color: var(--rojo-primario);
+        background: #fdedec;
+    }
+    
+    .upload-content h4 {
+        margin: 1rem 0 0.5rem 0;
+        color: var(--texto-oscuro);
+    }
+    
+    .upload-content p {
+        color: var(--texto-claro);
+        margin: 0;
+    }
+    
+    .upload-icon {
+        font-size: 3rem;
+        color: var(--texto-claro);
+    }
+    
+    .saber-pro-upload:hover .upload-icon {
+        color: var(--azul-primario);
+    }
+    
+    .saber-tyt-upload:hover .upload-icon {
+        color: var(--rojo-primario);
+    }
+    
+    .file-info {
+        display: none;
+        background: #e8f5e8;
+        border: 1px solid #c8e6c9;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+    }
+    
+    .file-details {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .file-details i {
+        font-size: 1.5rem;
+    }
+    
+    .file-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .instructions {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .controls-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .logs-container {
+        background: #2c3e50;
+        color: white;
+        border-radius: 6px;
+        padding: 1rem;
+        max-height: 300px;
+        overflow-y: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 0.85rem;
+    }
+    
+    .log-entry {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #34495e;
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .log-time {
+        color: #95a5a6;
+        min-width: 80px;
+    }
+    
+    .log-message {
+        flex: 1;
+    }
+    
+    .log-entry.info .log-message {
+        color: #27ae60;
+    }
+    
+    .log-entry.error .log-message {
+        color: #e74c3c;
+    }
+    
+    .log-entry.warning .log-message {
+        color: #f39c12;
+    }
+    
+    .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+    
+    .badge-primary {
+        background: var(--azul-primario);
+        color: white;
+    }
+    
+    .badge-danger {
+        background: var(--rojo-primario);
+        color: white;
+    }
+    
+    .text-primary {
+        color: var(--azul-primario) !important;
+    }
+    
+    .text-danger {
+        color: var(--rojo-primario) !important;
+    }
+    
+    .text-success {
+        color: #27ae60 !important;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .file-actions {
+            flex-direction: column;
+        }
+        
+        .controls-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .upload-area {
+            padding: 2rem 1rem;
+        }
+    }
+</style>
+
+<script>
+    let archivoPro = null;
+    let archivoTyt = null;
+    
+    function log(mensaje, tipo = 'info') {
+        const container = document.getElementById('logContainer');
+        const entry = document.createElement('div');
+        entry.className = `log-entry ${tipo}`;
+        
+        const timestamp = new Date().toLocaleTimeString();
+        
+        let icon = '📝';
+        if (mensaje.includes('✅')) icon = '✅';
+        if (mensaje.includes('❌')) icon = '❌';
+        if (mensaje.includes('🔄')) icon = '🔄';
+        if (mensaje.includes('📁')) icon = '📁';
+        if (mensaje.includes('🎓')) icon = '🎓';
+        if (mensaje.includes('📚')) icon = '📚';
+        
+        entry.innerHTML = `
+            <span class="log-time">[${timestamp}]</span>
+            <span class="log-message">${icon} ${mensaje}</span>
+        `;
+        container.appendChild(entry);
+        container.scrollTop = container.scrollHeight;
+        console.log(mensaje);
+    }
+    
+    // Event listeners para Saber PRO
+    document.getElementById('fileInputPro').addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            archivoPro = e.target.files[0];
+            document.getElementById('fileNamePro').textContent = archivoPro.name;
+            document.getElementById('fileInfoPro').style.display = 'block';
+            log(`📁 Archivo Saber PRO seleccionado: ${archivoPro.name}`);
+        }
+    });
+    
+    // Event listeners para Saber TYT
+    document.getElementById('fileInputTyt').addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            archivoTyt = e.target.files[0];
+            document.getElementById('fileNameTyt').textContent = archivoTyt.name;
+            document.getElementById('fileInfoTyt').style.display = 'block';
+            log(`📁 Archivo Saber T&T seleccionado: ${archivoTyt.name}`);
+        }
+    });
+    
+    function cancelarArchivo(tipo) {
+        if (tipo === 'PRO') {
+            document.getElementById('fileInputPro').value = '';
+            document.getElementById('fileInfoPro').style.display = 'none';
+            archivoPro = null;
+            log('❌ Selección de Saber PRO cancelada', 'warning');
+        } else {
+            document.getElementById('fileInputTyt').value = '';
+            document.getElementById('fileInfoTyt').style.display = 'none';
+            archivoTyt = null;
+            log('❌ Selección de Saber T&T cancelada', 'warning');
+        }
+    }
+    
+    function subirArchivo(tipoPrueba) {
+        let archivo = tipoPrueba === 'PRO' ? archivoPro : archivoTyt;
+        
+        if (!archivo) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Archivo requerido',
+                text: `Selecciona un archivo de Saber ${tipoPrueba} primero`,
+                confirmButtonColor: '#3085d6'
+            });
+            return;
+        }
+        
+        log(`🔄 Subiendo archivo Saber ${tipoPrueba}...`, 'info');
+        
+        const formData = new FormData();
+        formData.append('archivo', archivo);
+        
+        // Usar el endpoint específico según el tipo de prueba
+        const endpoint = tipoPrueba === 'PRO' 
+            ? '/coordinacion/importar/resultados/saberpro' 
+            : '/coordinacion/importar/resultados/tyt';
+        
+        fetch(endpoint, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                log(`✅ Saber ${tipoPrueba}: ${data.message}`, 'info');
+                log(`📊 Registros procesados: ${data.registrosProcesados || 0}`, 'info');
+                
+                if (data.estadisticas) {
+                    log(`🏫 Estudiantes en BD: ${data.estadisticas.estudiantes || 0}`, 'info');
+                    log(`📈 Resultados en BD: ${data.estadisticas.resultados || 0}`, 'info');
+                }
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: `✅ SABER ${tipoPrueba} IMPORTADO`,
+                    html: `${data.message}<br><strong>Registros procesados: ${data.registrosProcesados || 0}</strong>`,
+                    confirmButtonColor: '#28a745'
+                });
+                
+                cancelarArchivo(tipoPrueba);
+            } else {
+                log(`❌ Saber ${tipoPrueba}: ${data.message}`, 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: `❌ ERROR EN SABER ${tipoPrueba}`,
+                    text: data.message,
+                    confirmButtonColor: '#dc3545'
+                });
+            }
+        })
+        .catch(error => {
+            log(`❌ Error Saber ${tipoPrueba}: ${error.message}`, 'error');
+            Swal.fire({
+                icon: 'error',
+                title: `❌ ERROR EN SABER ${tipoPrueba}`,
+                text: error.message,
+                confirmButtonColor: '#dc3545'
+            });
+        });
+    }
+    
+    function probarEndpoint() {
+        log('🔍 Probando conexión con el servidor...', 'info');
+        fetch('/coordinacion/importar/test')
+            .then(response => response.text())
+            .then(data => log(`✅ ${data}`, 'info'))
+            .catch(error => log(`❌ Error de conexión: ${error.message}`, 'error'));
+    }
+    
+    function verificarBD() {
+        log('📊 Verificando estado de la base de datos...', 'info');
+        // Usar el endpoint de debug para verificar datos
+        fetch('/coordinacion/importar/debug-upload', {
+            method: 'POST',
+            body: new FormData() // Enviar formulario vacío solo para probar
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.estadisticasBD) {
+                log(`✅ Estudiantes: ${data.estadisticasBD.estudiantes}, Resultados: ${data.estadisticasBD.resultados}`, 'info');
+            } else {
+                log(`❌ ${data.message || 'Error al verificar BD'}`, 'error');
+            }
+        })
+        .catch(error => log(`❌ Error al verificar BD: ${error.message}`, 'error'));
+    }
+    
+    function limpiarLogs() {
+        document.getElementById('logContainer').innerHTML = '';
+        log('🧹 Logs limpiados', 'info');
+    }
+    
+    // Inicialización
+    document.addEventListener('DOMContentLoaded', function() {
+        log('✅ Sistema de importación cargado', 'info');
+        log('🎓 Selecciona un archivo Saber PRO o Saber T&T para comenzar', 'info');
+    });
+</script>
+</html>

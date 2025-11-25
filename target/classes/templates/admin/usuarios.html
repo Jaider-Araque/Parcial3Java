@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Usuarios - Admin</title>
+    <link th:href="@{/css/uts-theme.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    
+    <div class="main-layout">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <main class="main-content">
+            <!-- Alertas Flash -->
+            <div th:if="${success}" class="alert alert-success">
+                <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+            </div>
+            <div th:if="${warning}" class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i> <span th:text="${warning}"></span>
+            </div>
+            <div th:if="${error}" class="alert alert-danger">
+                <i class="fas fa-times-circle"></i> <span th:utext="${error}"></span>
+            </div>
+
+            <div class="uts-card">
+                <div class="card-header d-flex justify-between align-center">
+                    <div>
+                        <h1 class="card-title">👥 Gestión de Usuarios</h1>
+                        <p class="text-muted">Total de usuarios: <span th:text="${#lists.size(usuarios)}">0</span></p>
+                    </div>
+                    <a th:href="@{/admin/usuarios/nuevo}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Nuevo Usuario
+                    </a>
+                </div>
+                
+                <!-- Tarjetas de usuarios en lugar de tabla -->
+                <div class="users-grid" th:if="${not #lists.isEmpty(usuarios)}">
+                    <div class="user-card" th:each="usuario : ${usuarios}">
+                        <div class="user-header">
+                            <div class="user-avatar">
+                                <i class="fas" th:switch="${usuario.rol}">
+                                    <th:block th:case="ADMIN"><i class="fas fa-user-shield"></i></th:block>
+                                    <th:block th:case="COORDINACION"><i class="fas fa-user-tie"></i></th:block>
+                                    <th:block th:case="ESTUDIANTE"><i class="fas fa-user-graduate"></i></th:block>
+                                </i>
+                            </div>
+                            <div class="user-info">
+                                <h3 th:text="${usuario.nombres} + ' ' + ${usuario.apellidos}">Nombre Usuario</h3>
+                                <p class="user-username" th:text="'@' + ${usuario.username}">@username</p>
+                            </div>
+                            <div class="user-badges">
+                                <span th:switch="${usuario.rol}" class="role-badge">
+                                    <span th:case="ADMIN" class="badge-admin">👑 ADMIN</span>
+                                    <span th:case="COORDINACION" class="badge-coordinacion">📋 COORDINACIÓN</span>
+                                    <span th:case="ESTUDIANTE" class="badge-estudiante">🎓 ESTUDIANTE</span>
+                                </span>
+                                <span th:if="${usuario.activo}" class="status-badge active">🟢 Activo</span>
+                                <span th:unless="${usuario.activo}" class="status-badge inactive">🔴 Inactivo</span>
+                            </div>
+                        </div>
+                        
+                        <div class="user-details">
+                            <div class="detail-item">
+                                <i class="fas fa-envelope"></i>
+                                <span th:text="${usuario.email}">email@ejemplo.com</span>
+                            </div>
+                            <div class="detail-item" th:if="${usuario.estudiante != null}">
+                                <i class="fas fa-graduation-cap"></i>
+                                <span th:text="${usuario.estudiante.programaAcademico}">Programa Académico</span>
+                            </div>
+                        </div>
+                        
+                        <div class="user-actions">
+                            <!-- Editar -->
+                            <a th:href="@{/admin/usuarios/editar/{username}(username=${usuario.username})}" 
+                               class="btn-action btn-edit" title="Editar usuario">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            
+                            <!-- Activar/Desactivar -->
+                            <button th:if="${usuario.activo}" 
+                                    class="btn-action btn-pause" 
+                                    th:data-username="${usuario.username}"
+                                    onclick="adminUsuariosApp.desactivarUsuario(this)" title="Desactivar usuario">
+                                <i class="fas fa-pause"></i>
+                            </button>
+                            <button th:unless="${usuario.activo}" 
+                                    class="btn-action btn-play"
+                                    th:data-username="${usuario.username}"
+                                    onclick="adminUsuariosApp.activarUsuario(this)" title="Activar usuario">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            
+                            <!-- Eliminar - Deshabilitado para estudiantes -->
+                            <button th:if="${usuario.rol.name() == 'ADMIN' or usuario.rol.name() == 'COORDINACION'}"
+                                    class="btn-action btn-delete"
+                                    th:data-username="${usuario.username}"
+                                    th:data-nombre="${usuario.nombres} + ' ' + ${usuario.apellidos}"
+                                    th:data-rol="${usuario.rol.name()}"
+                                    title="Eliminar usuario">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button th:if="${usuario.rol.name() == 'ESTUDIANTE'}"
+                                    class="btn-action btn-delete disabled"
+                                    title="No se pueden eliminar estudiantes"
+                                    disabled>
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mensaje cuando no hay usuarios -->
+                <div th:if="${#lists.isEmpty(usuarios)}" class="no-users">
+                    <div class="no-users-icon">
+                        <i class="fas fa-users-slash"></i>
+                    </div>
+                    <h3>No hay usuarios registrados</h3>
+                    <p>Comienza agregando el primer usuario al sistema</p>
+                    <a th:href="@{/admin/usuarios/nuevo}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Crear Primer Usuario
+                    </a>
+                </div>
+                
+                <div class="text-center mt-3">
+                    <a href="/admin/dashboard" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver al Dashboard
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <!-- Incluir el archivo JavaScript -->
+    <script th:src="@{/js/adminusuarios.js}"></script>
+
+    <style>
+        /* Grid de usuarios */
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        /* Tarjeta de usuario */
+        .user-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .user-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        
+        /* Header de la tarjeta */
+        .user-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .user-info {
+            flex: 1;
+        }
+        
+        .user-info h3 {
+            margin: 0 0 0.25rem 0;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+        
+        .user-username {
+            margin: 0;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .user-badges {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            align-items: flex-end;
+        }
+        
+        /* Badges */
+        .role-badge, .status-badge {
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        
+        .badge-admin {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+        
+        .badge-coordinacion {
+            background: linear-gradient(135deg, #feca57, #ff9ff3);
+            color: #2c2c54;
+        }
+        
+        .badge-estudiante {
+            background: linear-gradient(135deg, #48dbfb, #0abde3);
+            color: white;
+        }
+        
+        .status-badge.active {
+            background: #e8f5e8;
+            color: #27ae60;
+            border: 1px solid #27ae60;
+        }
+        
+        .status-badge.inactive {
+            background: #ffeaa7;
+            color: #e17055;
+            border: 1px solid #e17055;
+        }
+        
+        /* Detalles del usuario */
+        .user-details {
+            margin-bottom: 1.5rem;
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .detail-item i {
+            width: 16px;
+            color: #bed52f;
+        }
+        
+        /* Acciones */
+        .user-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            border-top: 1px solid #e9ecef;
+            padding-top: 1rem;
+        }
+        
+        .btn-action {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .btn-edit {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .btn-edit:hover {
+            background: #1976d2;
+            color: white;
+        }
+        
+        .btn-play {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .btn-play:hover {
+            background: #2e7d32;
+            color: white;
+        }
+        
+        .btn-pause {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        .btn-pause:hover {
+            background: #ef6c00;
+            color: white;
+        }
+        
+        .btn-delete {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+        
+        .btn-delete:hover:not(.disabled) {
+            background: #d32f2f;
+            color: white;
+        }
+        
+        .btn-delete.disabled {
+            background: #f5f5f5;
+            color: #bdbdbd;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        /* Estado cuando no hay usuarios */
+        .no-users {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #6c757d;
+        }
+        
+        .no-users-icon {
+            font-size: 4rem;
+            color: #dee2e6;
+            margin-bottom: 1rem;
+        }
+        
+        .no-users h3 {
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Alertas */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+        }
+        
+        .alert-success {
+            background-color: #e8f5e8;
+            border-color: #28a745;
+            color: #155724;
+        }
+        
+        .alert-warning {
+            background-color: #fff3e0;
+            border-color: #ff9800;
+            color: #664d03;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .alert i {
+            margin-right: 0.5rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .users-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .user-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .user-badges {
+                align-items: center;
+                flex-direction: row;
+                justify-content: center;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</body>
+<script th:src="@{/js/common.js}"></script>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Beneficios - Estudiante</title>
+    <link th:href="@{/css/uts-theme.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    
+    <div class="main-layout">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <main class="main-content">
+            <!-- Header -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h1 class="card-title">💰 Mis Beneficios</h1>
+                    <p>Consulta los beneficios académicos obtenidos según tus resultados Saber Pro/T&T</p>
+                </div>
+            </div>
+
+            <!-- Resumen de Beneficios CON DATOS REALES -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🎁</div>
+                    <div class="stat-number" th:text="${beneficiosActivos} ?: '0'">0</div>
+                    <div class="stat-label">Beneficios Activos</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-number" th:text="${beneficiosPendientes} ?: '0'">0</div>
+                    <div class="stat-label">En Proceso</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-number" th:text="${beneficiosFinalizados} ?: '0'">0</div>
+                    <div class="stat-label">Histórico</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-number" th:if="${totalValorBeneficios != null}" th:text="'$' + ${#numbers.formatInteger(totalValorBeneficios, 0, 'COMMA')}">$0</div>
+                    <div class="stat-number no-data" th:unless="${totalValorBeneficios != null}">--</div>
+                    <div class="stat-label">Total Beneficios</div>
+                </div>
+            </div>
+
+            <!-- Beneficios Activos CON DATOS REALES -->
+            <div class="uts-card" th:if="${not #lists.isEmpty(beneficiosActivosLista)}">
+                <div class="card-header">
+                    <h2 class="card-title">🟢 Beneficios Activos</h2>
+                </div>
+                <div class="benefits-grid">
+                    <div class="benefit-card active" th:each="beneficio : ${beneficiosActivosLista}">
+                        <div class="benefit-icon" th:with="
+                            tipo=${beneficio.tipoBeneficio},
+                            icono=${tipo == T(com.uts.saberpro.entity.Beneficio$TipoBeneficio).EXONERACION_TRABAJO_GRADO} ? '🎓' : 
+                                   (${tipo == T(com.uts.saberpro.entity.Beneficio$TipoBeneficio).DESCUENTO_50_DERECHOS_GRADO} ? '💰' : '💎')
+                        " th:text="${icono}">
+                            💰
+                        </div>
+                        <div class="benefit-content">
+                            <h3 th:text="${#strings.capitalize(#strings.replace(#strings.toLowerCase(beneficio.tipoBeneficio.toString()), '_', ' '))}">
+                                Tipo Beneficio
+                            </h3>
+                            <p class="benefit-description" th:text="'Beneficio académico asignado'">
+                                Descripción
+                            </p>
+                            <div class="benefit-details">
+                                <span class="benefit-value" th:text="'Nota: ' + ${beneficio.notaAsignada}">
+                                    Nota: 0.0
+                                </span>
+                                <span class="benefit-period" th:if="${beneficio.porcentajeDescuento > 0}" 
+                                      th:text="'Descuento: ' + ${beneficio.porcentajeDescuento} + '%'">
+                                    Descuento
+                                </span>
+                                <span class="benefit-period" th:text="'Asignado: ' + ${#temporals.format(beneficio.fechaAsignacion, 'dd/MM/yyyy')}">
+                                    Fecha
+                                </span>
+                            </div>
+                        </div>
+                        <div class="benefit-status">
+                            <span class="status-badge status-active">Activo</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mensaje cuando no hay beneficios activos -->
+            <div class="uts-card" th:if="${#lists.isEmpty(beneficiosActivosLista)}">
+                <div class="card-header">
+                    <h2 class="card-title">🟢 Beneficios Activos</h2>
+                </div>
+                <div class="no-benefits-message">
+                    <i class="fas fa-gift no-benefits-icon"></i>
+                    <h3>No tienes beneficios activos</h3>
+                    <p>Los beneficios se asignan automáticamente cuando apruebas las pruebas Saber Pro/T&T con puntajes destacados.</p>
+                    <div class="benefits-info">
+                        <h4>📊 Rangos para beneficios:</h4>
+                        <ul>
+                            <li><strong>Saber T&amp;T (120-150 pts):</strong> Exoneración trabajo grado + Nota 4.5</li>
+                            <li><strong>Saber T&amp;T (151-170 pts):</strong> Exoneración + 50% derechos grado + Nota 4.7</li>
+                            <li><strong>Saber T&amp;T (&gt;171 pts):</strong> Exoneración + 100% derechos grado + Nota 5.0</li>
+                            <li><strong>Saber Pro (180-210 pts):</strong> Exoneración trabajo grado + Nota 4.5</li>
+                            <li><strong>Saber Pro (211-240 pts):</strong> Exoneración + 50% derechos grado + Nota 4.7</li>
+                            <li><strong>Saber Pro (&gt;241 pts):</strong> Exoneración + 100% derechos grado + Nota 5.0</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Histórico de Beneficios CON DATOS REALES -->
+            <div class="uts-card mt-2" th:if="${not #lists.isEmpty(beneficiosFinalizadosLista)}">
+                <div class="card-header">
+                    <h2 class="card-title">📋 Histórico de Beneficios</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="uts-table">
+                        <thead>
+                            <tr>
+                                <th>Beneficio</th>
+                                <th>Tipo</th>
+                                <th>Nota</th>
+                                <th>Descuento</th>
+                                <th>Fecha Asignación</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="beneficio : ${beneficiosFinalizadosLista}">
+                                <td th:text="${#strings.capitalize(#strings.replace(#strings.toLowerCase(beneficio.tipoBeneficio.toString()), '_', ' '))}">
+                                    Tipo Beneficio
+                                </td>
+                                <td th:text="${beneficio.tipoBeneficio}">Tipo</td>
+                                <td th:text="${beneficio.notaAsignada}">0.0</td>
+                                <td th:text="${beneficio.porcentajeDescuento} + '%'">0%</td>
+                                <td th:text="${#temporals.format(beneficio.fechaAsignacion, 'dd/MM/yyyy')}">Fecha</td>
+                                <td>
+                                    <span class="status-badge status-completed">Finalizado</span>
+                                </td>
+                                <td>
+                                    <button class="btn-icon" title="Descargar Certificado" th:onclick="|beneficiosApp.descargarCertificadoBeneficio('${beneficio.id}')|">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pruebas Aprobadas Elegibles para Beneficios -->
+            <div class="uts-card mt-2" th:if="${not #lists.isEmpty(pruebasAprobadasSinBeneficios)}">
+                <div class="card-header">
+                    <h2 class="card-title">🎯 Pruebas Aprobadas - Beneficios Pendientes</h2>
+                    <p>Estas pruebas están aprobadas y pueden generar beneficios</p>
+                </div>
+                <div class="benefits-grid">
+                    <div class="benefit-card available" th:each="prueba : ${pruebasAprobadasSinBeneficios}">
+                        <div class="benefit-icon" th:text="${prueba.tipoPrueba == T(com.uts.saberpro.entity.TipoPrueba).SABER_PRO} ? '📊' : '🔧'">
+                            📊
+                        </div>
+                        <div class="benefit-content">
+                            <h3 th:text="${prueba.tipoPrueba} + ' - ' + ${prueba.periodo} + '/' + ${prueba.anioPrueba}">Prueba</h3>
+                            <p class="benefit-description" th:text="'Puntaje: ' + ${prueba.puntajeGlobal} + ' puntos'">
+                                Puntaje
+                            </p>
+                            <div class="benefit-requirements">
+                                <span class="requirement" 
+                                      th:if="${prueba.tipoPrueba == T(com.uts.saberpro.entity.TipoPrueba).SABER_TYT} and ${prueba.puntajeGlobal >= 120} and ${prueba.puntajeGlobal <= 150}">
+                                    Elegible: Exoneración + Nota 4.5
+                                </span>
+                                <span class="requirement" 
+                                      th:if="${prueba.tipoPrueba == T(com.uts.saberpro.entity.TipoPrueba).SABER_TYT} and ${prueba.puntajeGlobal >= 151} and ${prueba.puntajeGlobal <= 170}">
+                                    Elegible: Exoneración + 50% descuento + Nota 4.7
+                                </span>
+                                <span class="requirement" 
+                                      th:if="${prueba.tipoPrueba == T(com.uts.saberpro.entity.TipoPrueba).SABER_TYT} and ${prueba.puntajeGlobal > 170}">
+                                    Elegible: Exoneración + 100% descuento + Nota 5.0
+                                </span>
+                                <span class="requirement" 
+                                      th:if="${prueba.tipoPrueba == T(com.uts.saberpro.entity.TipoPrueba).SABER_PRO} and ${prueba.puntajeGlobal >= 180} and ${prueba.puntajeGlobal <= 210}">
+                                    Elegible: Exoneración + Nota 4.5
+                                </span>
+                                <span class="requirement" 
+                                      th:if="${prueba.tipoPrueba == T(com.uts.saberpro.entity.TipoPrueba).SABER_PRO} and ${prueba.puntajeGlobal >= 211} and ${prueba.puntajeGlobal <= 240}">
+                                    Elegible: Exoneración + 50% descuento + Nota 4.7
+                                </span>
+                                <span class="requirement" 
+                                      th:if="${prueba.tipoPrueba == T(com.uts.saberpro.entity.TipoPrueba).SABER_PRO} and ${prueba.puntajeGlobal > 240}">
+                                    Elegible: Exoneración + 100% descuento + Nota 5.0
+                                </span>
+                            </div>
+                        </div>
+                        <div class="benefit-actions">
+                            <button class="btn btn-primary btn-sm" th:onclick="|beneficiosApp.solicitarBeneficio('${prueba.id}')|">
+                                <i class="fas fa-paper-plane"></i> Solicitar Beneficio
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información sobre el Sistema de Beneficios -->
+            <div class="uts-card mt-2">
+                <div class="card-header">
+                    <h2 class="card-title">ℹ️ Sistema de Beneficios UTS</h2>
+                </div>
+                <div class="benefits-info-detailed">
+                    <div class="info-section">
+                        <h4>🎯 ¿Cómo obtener beneficios?</h4>
+                        <p>Los beneficios se asignan automáticamente cuando apruebas las pruebas de estado con puntajes destacados, según el Acuerdo 01-009 de la UTS.</p>
+                    </div>
+                    
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <h5>Saber T&amp;T</h5>
+                            <ul>
+                                <li><strong>120-150 pts:</strong> Exoneración trabajo grado + Nota 4.5</li>
+                                <li><strong>151-170 pts:</strong> + 50% derechos grado + Nota 4.7</li>
+                                <li><strong>&gt;171 pts:</strong> + 100% derechos grado + Nota 5.0</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="info-card">
+                            <h5>Saber Pro</h5>
+                            <ul>
+                                <li><strong>180-210 pts:</strong> Exoneración trabajo grado + Nota 4.5</li>
+                                <li><strong>211-240 pts:</strong> + 50% derechos grado + Nota 4.7</li>
+                                <li><strong>&gt;241 pts:</strong> + 100% derechos grado + Nota 5.0</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="info-note">
+                        <p><strong>Nota:</strong> Los beneficios aplican únicamente para pruebas en estado <span class="text-success">APROBADO</span>. 
+                        Las pruebas reprobadas o anuladas no generan beneficios.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    <script th:src="@{/js/common.js}"></script>
+    <script th:src="@{/js/beneficiosestudiante.js}"></script>
+</body>
+</html>
