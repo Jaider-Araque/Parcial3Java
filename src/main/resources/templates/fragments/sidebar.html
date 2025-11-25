@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <nav class="uts-sidebar" th:fragment="sidebar">
+        <div class="sidebar-content">
+            <ul class="sidebar-nav">
+                <!-- Menú Admin -->
+                <div sec:authorize="hasRole('ADMIN')">
+                    <li class="nav-item">
+                        <a href="/admin/dashboard" class="nav-link">
+                            <span class="nav-icon">📊</span>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/admin/usuarios" class="nav-link">
+                            <span class="nav-icon">👥</span>
+                            <span>Gestión de Usuarios</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/admin/reportes" class="nav-link">
+                            <span class="nav-icon">📋</span>
+                            <span>Reportes</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/admin/configuracion" class="nav-link">
+                            <span class="nav-icon">⚙️</span>
+                            <span>Configuración</span>
+                        </a>
+                    </li>
+                </div>
+                
+				<!-- Menú Coordinación -->
+				                <div sec:authorize="hasRole('COORDINACION')">
+				                    <li class="nav-item">
+				                        <a href="/coordinacion/dashboard" class="nav-link">
+				                            <i class="nav-icon fas fa-tachometer-alt"></i>
+				                            <span>Dashboard</span>
+				                        </a>
+				                    </li>
+				                    <li class="nav-item">
+				                        <a href="/coordinacion/estudiantes" class="nav-link">
+				                            <i class="nav-icon fas fa-user-graduate"></i>
+				                            <span>Gestión Estudiantes</span>
+				                        </a>
+				                    </li>
+				                    <li class="nav-item">
+				                        <a href="/coordinacion/resultados" class="nav-link">
+				                            <i class="nav-icon fas fa-chart-bar"></i>
+				                            <span>Resultados</span>
+				                        </a>
+				                    </li>
+				                    <li class="nav-item">
+				                        <a href="/coordinacion/beneficios" class="nav-link">
+				                            <i class="nav-icon fas fa-award"></i>
+				                            <span>Beneficios</span>
+				                        </a>
+				                    </li>
+				                    <li class="nav-item">
+				                        <a href="/coordinacion/reportes" class="nav-link">
+				                            <i class="nav-icon fas fa-file-alt"></i>
+				                            <span>Reportes</span>
+				                        </a>
+				                    </li>
+				                    <li class="nav-item">
+				                        <a href="/coordinacion/importar" class="nav-link">
+				                            <i class="nav-icon fas fa-file-import"></i>
+				                            <span>Importar Datos</span>
+				                        </a>
+				                    </li>
+				                </div>                
+								<!-- Menú Estudiante -->
+								<div sec:authorize="hasRole('ESTUDIANTE')">
+								    <li class="nav-item">
+								        <a href="/estudiante/dashboard" class="nav-link">
+								            <i class="nav-icon fas fa-tachometer-alt"></i>
+								            <span>Mi Dashboard</span>
+								        </a>
+								    </li>
+								    <li class="nav-item">
+								        <a href="/estudiante/resultados" class="nav-link">
+								            <i class="nav-icon fas fa-chart-bar"></i>
+								            <span>Mis Resultados</span>
+								        </a>
+								    </li>
+								    <li class="nav-item">
+								        <a href="/estudiante/beneficios" class="nav-link">
+								            <i class="nav-icon fas fa-award"></i>
+								            <span>Mis Beneficios</span>
+								        </a>
+								    </li>
+								    <li class="nav-item">
+								        <a href="/estudiante/estadisticas" class="nav-link">
+								            <i class="nav-icon fas fa-chart-line"></i>
+								            <span>Estadísticas</span>
+								        </a>
+								    </li>
+								    <li class="nav-item">
+								        <a href="/estudiante/perfil" class="nav-link">
+								            <i class="nav-icon fas fa-user"></i>
+								            <span>Mi Perfil</span>
+								        </a>
+								    </li>
+								</div>
+            </ul>
+        </div>
+    </nav>
+</body>
+</html>

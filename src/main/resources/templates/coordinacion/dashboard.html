@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Coordinación - Saber Pro UTS</title>
+    <link th:href="@{/css/uts-theme.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="uts-header">
+        <div class="header-content">
+            <div class="uts-logo">
+                <img th:src="@{/images/logo-uts.png}" alt="UTS Logo" onerror="this.style.display='none'">
+                <div class="logo-text">Sistema Saber Pro</div>
+            </div>
+            <div class="user-info">
+                <span class="user-welcome">Coordinador: <strong th:text="${#authentication.name}">coordinacion</strong></span>
+                <a href="/logout" class="btn btn-secondary btn-sm">Cerrar Sesión</a>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Layout Principal -->
+    <div class="main-layout">
+		<div th:replace="fragments/sidebar :: sidebar"></div>
+        <!-- Contenido Principal -->
+        <main class="main-content">
+            <!-- Tarjeta de Bienvenida -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h1 class="card-title">🎓 Panel de Coordinación Académica</h1>
+                    <p>Gestión de estudiantes y resultados Saber Pro/T&T de las Unidades Tecnológicas de Santander</p>
+                </div>
+                
+                <!-- Estadísticas PRINCIPALES -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon student-icon">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 th:text="${totalEstudiantes} ?: '0'">0</h3>
+                            <p>Total Estudiantes</p>
+                            <div class="stat-breakdown">
+                                <span class="badge badge-pro" th:text="${estudiantesSaberPro} ?: '0'">0 Saber Pro</span>
+                                <span class="badge badge-tyt" th:text="${estudiantesSaberTyt} ?: '0'">0 Saber T&T</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon results-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 th:text="${totalResultados} ?: '0'">0</h3>
+                            <p>Resultados Cargados</p>
+                            <div class="stat-breakdown">
+                                <span class="badge badge-pro" th:text="${resultadosSaberPro} ?: '0'">0 Saber Pro</span>
+                                <span class="badge badge-tyt" th:text="${resultadosSaberTyt} ?: '0'">0 Saber T&T</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon benefits-icon">
+                            <i class="fas fa-award"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 th:text="${totalBeneficios} ?: '0'">0</h3>
+                            <p>Beneficios Asignados</p>
+                            <div class="stat-breakdown">
+                                <span class="badge badge-success" th:text="${beneficiosActivos} ?: '0'">0 Activos</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon import-icon">
+                            <i class="fas fa-file-import"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 th:text="${totalImportaciones} ?: '0'">0</h3>
+                            <p>Importaciones Realizadas</p>
+                            <div class="stat-breakdown">
+                                <span class="badge badge-success" th:text="${importacionesExitosas} ?: '0'">0 Exitosas</span>
+                                <span class="badge badge-warning" th:text="${importacionesConErrores} ?: '0'">0 Con Errores</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Menú de Acciones Rápidas -->
+            <div class="menu-grid">
+                <a href="/coordinacion/estudiantes" class="menu-card">
+                    <div class="menu-icon student-menu">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h3>Gestión Estudiantes</h3>
+                    <p>Administrar <strong th:text="${totalEstudiantes} ?: '0'">0</strong> estudiantes y sus datos académicos</p>
+                </a>
+                
+                <a href="/coordinacion/resultados" class="menu-card">
+                    <div class="menu-icon results-menu">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3>Resultados</h3>
+                    <p>Gestionar <strong th:text="${totalResultados} ?: '0'">0</strong> resultados de pruebas</p>
+                </a>
+                
+                <a href="/coordinacion/beneficios" class="menu-card">
+                    <div class="menu-icon benefits-menu">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <h3>Beneficios</h3>
+                    <p>Asignar beneficios a estudiantes destacados</p>
+                </a>
+                
+                <a href="/coordinacion/reportes" class="menu-card">
+                    <div class="menu-icon reports-menu">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h3>Reportes</h3>
+                    <p>Generar reportes estadísticos y análisis</p>
+                </a>
+                
+                <a href="/coordinacion/importar" class="menu-card">
+                    <div class="menu-icon import-menu">
+                        <i class="fas fa-file-import"></i>
+                    </div>
+                    <h3>Importar Datos</h3>
+                    <p>Cargar datos masivos de estudiantes y resultados</p>
+                </a>
+            </div>
+            
+            <!-- Sección de Importaciones Recientes -->
+            <div class="uts-card mt-2">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-file-import"></i>
+                        📥 Últimas Importaciones
+                    </h2>
+                    <a href="/coordinacion/importar" class="btn btn-primary btn-sm">Nueva Importación</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="uts-table">
+                            <thead>
+                                <tr>
+                                    <th>Archivo</th>
+                                    <th>Tipo</th>
+                                    <th>Fecha</th>
+                                    <th>Registros</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="importacion : ${ultimasImportaciones}">
+                                    <td th:text="${importacion.nombreArchivo}">archivo.xlsx</td>
+                                    <td>
+                                        <span class="badge" th:classappend="${importacion.tipoImportacion == 'RESULTADOS'} ? 'badge-pro' : 'badge-tyt'"
+                                              th:text="${importacion.tipoImportacion}">TIPO</span>
+                                    </td>
+                                    <td th:text="${#temporals.format(importacion.fechaImportacion, 'dd/MM/yyyy HH:mm')}">01/01/2024</td>
+                                    <td>
+                                        <span th:text="${importacion.registrosExitosos} + '/' + ${importacion.totalRegistros}">0/0</span>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge" th:classappend="${importacion.estado == 'COMPLETADO'} ? 'status-success' : 
+                                                                                 ${importacion.estado == 'CON_ERRORES'} ? 'status-warning' : 
+                                                                                 'status-error'"
+                                              th:text="${importacion.estado}">Estado</span>
+                                    </td>
+                                </tr>
+                                <tr th:unless="${ultimasImportaciones} and ${not ultimasImportaciones.empty}">
+                                    <td colspan="5" class="text-center text-muted">
+                                        No hay importaciones recientes
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Actividad Reciente -->
+            <div class="uts-card mt-2">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-history"></i>
+                        📋 Actividad Reciente del Sistema
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon activity-success">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p><strong>Sistema inicializado correctamente</strong></p>
+                                <span class="activity-time">Hace unos momentos</span>
+                            </div>
+                        </div>
+                        <div class="activity-item" th:if="${ultimasImportaciones} and ${not ultimasImportaciones.empty}">
+                            <div class="activity-icon activity-info">
+                                <i class="fas fa-file-import"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p><strong>Última importación: <span th:text="${ultimasImportaciones[0].nombreArchivo}">archivo.xlsx</span></strong></p>
+                                <span class="activity-time" th:text="'Hace ' + ${#temporals.format(ultimasImportaciones[0].fechaImportacion, 'HH:mm')}">Hace 2 horas</span>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon activity-warning">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p><strong th:text="${totalEstudiantes} + ' estudiantes registrados en el sistema'">0 estudiantes registrados</strong></p>
+                                <span class="activity-time">Base de datos actualizada</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+	<!-- Footer -->
+	<div th:replace="fragments/footer :: footer"></div>
+</body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animación de números en las estadísticas
+        const statNumbers = document.querySelectorAll('.stat-card h3');
+        statNumbers.forEach(stat => {
+            const currentValue = parseInt(stat.textContent.replace(/,/g, '')) || 0;
+            if (currentValue > 0) {
+                animateValue(stat, 0, currentValue, 2000);
+            }
+        });
+
+        function animateValue(element, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const value = Math.floor(progress * (end - start) + start);
+                element.textContent = value.toLocaleString();
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+    });
+</script>
+
+<style>
+    /* Estadísticas Mejoradas */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin: 1.5rem 0;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-left: 4px solid var(--azul-primario);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    /* Colores específicos para cada ícono */
+    .student-icon { background: #3498db; border-left-color: #3498db; }
+    .results-icon { background: #27ae60; border-left-color: #27ae60; }
+    .benefits-icon { background: #f39c12; border-left-color: #f39c12; }
+    .import-icon { background: #95a5a6; border-left-color: #95a5a6; }
+
+    .stat-info h3 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--texto-oscuro);
+    }
+
+    .stat-info p {
+        margin: 0.25rem 0 0.5rem 0;
+        color: var(--texto-claro);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .stat-breakdown {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    /* Badges */
+    .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: white;
+    }
+
+    .badge-pro { background: #3498db; }
+    .badge-tyt { background: #e74c3c; }
+    .badge-success { background: #27ae60; }
+    .badge-warning { background: #f39c12; }
+
+    /* Menú de Acciones */
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .menu-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem 1.5rem;
+        text-decoration: none;
+        color: inherit;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        text-align: center;
+    }
+
+    .menu-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        border-color: var(--azul-primario);
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .menu-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        color: white;
+        font-size: 1.8rem;
+    }
+
+    /* Colores para menú */
+    .student-menu { background: #3498db; }
+    .results-menu { background: #27ae60; }
+    .benefits-menu { background: #f39c12; }
+    .reports-menu { background: #9b59b6; }
+    .import-menu { background: #95a5a6; }
+
+    .menu-card h3 {
+        margin: 0 0 0.5rem 0;
+        color: var(--texto-oscuro);
+        font-size: 1.2rem;
+    }
+
+    .menu-card p {
+        margin: 0;
+        color: var(--texto-claro);
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    /* Actividad Reciente */
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--gris-claro);
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+
+    .activity-item:hover {
+        background: var(--gris-medio);
+        transform: translateX(5px);
+    }
+
+    .activity-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .activity-success { background: #27ae60; }
+    .activity-info { background: #3498db; }
+    .activity-warning { background: #f39c12; }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-content p {
+        margin: 0;
+        color: var(--texto-oscuro);
+    }
+
+    .activity-time {
+        font-size: 0.8rem;
+        color: var(--texto-claro);
+    }
+
+    /* Badges y Estados */
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-success { background: #e8f5e8; color: #2e7d32; }
+    .status-warning { background: #fff3e0; color: #ef6c00; }
+    .status-error { background: #ffebee; color: #c62828; }
+
+    /* Tabla */
+    .uts-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .uts-table th,
+    .uts-table td {
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid var(--gris-medio);
+    }
+    
+    .uts-table th {
+        background: var(--gris-claro);
+        font-weight: 600;
+        color: var(--texto-oscuro);
+    }
+    
+    .uts-table tr:hover {
+        background: var(--gris-claro);
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .menu-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .activity-item {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .stat-card {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+</html>

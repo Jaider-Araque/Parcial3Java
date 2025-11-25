@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <header class="uts-header" th:fragment="header">
+        <div class="header-content">
+            <div class="uts-logo">
+                <img th:src="@{/images/logo-uts.png}" alt="UTS Logo" onerror="this.style.display='none'">
+                <div class="logo-text">Sistema Saber Pro</div>
+            </div>
+            <div class="user-info">
+                <span class="user-welcome" th:text="'Usuario: ' + ${#authentication.name}">Usuario: admin</span>
+                <a href="/logout" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </a>
+            </div>
+        </div>
+    </header>
+</body>
+</html>

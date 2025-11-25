@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Resultados - Coordinación</title>
+    <link th:href="@{/css/uts-theme.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .resultado-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+        
+        .puntaje-global {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 0;
+            color: white;
+        }
+        
+        .competencias-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .competencia-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #e9ecef;
+            transition: transform 0.2s;
+        }
+        
+        .competencia-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+        
+        .competencia-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .competencia-nombre {
+            font-weight: 600;
+            color: #495057;
+            font-size: 1.1rem;
+        }
+        
+        .puntaje-competencia {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .nivel-badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .nivel-4 { background: #27ae60; }
+        .nivel-3 { background: #3498db; }
+        .nivel-2 { background: #f39c12; }
+        .nivel-1 { background: #e74c3c; }
+        .nivel-na { background: #95a5a6; }
+        
+        .barra-progreso {
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        
+        .progreso-nivel {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.5s ease-in-out;
+        }
+        
+        .progreso-4 { background: #27ae60; width: 100%; }
+        .progreso-3 { background: #3498db; width: 75%; }
+        .progreso-2 { background: #f39c12; width: 50%; }
+        .progreso-1 { background: #e74c3c; width: 25%; }
+        
+        .info-adicional {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .estado-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: white;
+        }
+        
+        .badge-success { background: #28a745; }
+        .badge-danger { background: #dc3545; }
+        .badge-warning { background: #ffc107; color: #212529; }
+        .badge-secondary { background: #6c757d; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+        
+        .btn-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        
+        .btn-edit {
+            color: #3498db;
+        }
+        
+        .btn-edit:hover {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-delete {
+            color: #e74c3c;
+        }
+        
+        .btn-delete:hover {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .btn-view {
+            color: #27ae60;
+        }
+        
+        .btn-view:hover {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .search-input-container {
+            position: relative;
+        }
+        
+        .search-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+        }
+        
+        .filters-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            margin-top: 2rem;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .pagination-info {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .text-muted {
+            color: #6c757d !important;
+        }
+        
+        .text-sm {
+            font-size: 0.875rem;
+        }
+        
+        .d-flex {
+            display: flex;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .align-center {
+            align-items: center;
+        }
+        
+        .gap-2 {
+            gap: 0.5rem;
+        }
+        
+        .mb-4 {
+            margin-bottom: 1.5rem;
+        }
+        
+        .mb-0 {
+            margin-bottom: 0;
+        }
+        
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+        
+        .py-5 {
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        /* Estilos para la paginación mejorada */
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+        
+        .pagination-numbers {
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+        }
+        
+        .pagination-ellipsis {
+            padding: 0.5rem;
+            color: #6c757d;
+        }
+        
+        @media (max-width: 768px) {
+            .competencias-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters-actions {
+                flex-direction: column;
+            }
+            
+            .pagination {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .competencia-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .pagination-controls {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .pagination-numbers {
+                order: -1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    
+    <div class="main-layout">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <main class="main-content">
+            <!-- Header -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h1 class="card-title">
+                        <i class="fas fa-chart-bar"></i>
+                        📊 Resultados de Pruebas
+                    </h1>
+                    <p>Gestionar resultados de pruebas Saber Pro/T&T con niveles de competencia</p>
+                </div>
+            </div>
+
+            <!-- Filtros Mejorados -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-search"></i>
+                        🔍 Filtros de Búsqueda
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="filtroForm" th:action="@{/coordinacion/resultados}" method="get">
+                        <input type="hidden" name="pagina" id="paginaInput" value="0">
+                        <input type="hidden" name="tamaño" value="5">
+                        
+                        <div class="filters-grid">
+                            <div class="form-group">
+                                <label class="form-label">Buscar por Documento</label>
+                                <div class="search-input-container">
+                                    <input type="text" class="form-control" name="documento" 
+                                           placeholder="Número de documento"
+                                           th:value="${documentoFiltro}" id="documentoInput">
+                                    <button type="submit" class="search-btn">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                                <small class="form-text text-muted" th:if="${estudianteFiltrado}">
+                                    Mostrando resultados de: 
+                                    <strong th:text="${estudianteFiltrado.nombres + ' ' + estudianteFiltrado.apellidos}"></strong>
+                                </small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Resultados por página</label>
+                                <select class="form-control" name="tamaño" onchange="this.form.submit()">
+                                    <option value="5" th:selected="${param.tamaño != null && param.tamaño[0] == '5'}">5 resultados</option>
+                                    <option value="10" th:selected="${param.tamaño != null && param.tamaño[0] == '10'}">10 resultados</option>
+                                    <option value="20" th:selected="${param.tamaño != null && param.tamaño[0] == '20'}">20 resultados</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="filters-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-filter"></i> Aplicar Filtros
+                            </button>
+                            <a th:href="@{/coordinacion/resultados}" class="btn btn-outline">
+                                <i class="fas fa-times"></i> Limpiar Filtros
+                            </a>
+                            <button type="button" onclick="mostrarModalResultado()" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Nuevo Resultado
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Información de Resultados -->
+            <div class="uts-card" th:if="${!resultadosConNiveles.empty}">
+                <div class="card-body">
+                    <div class="d-flex justify-between align-center">
+                        <div>
+                            <strong th:text="${totalElementos}"></strong> resultados encontrados
+                            <span th:if="${documentoFiltro}">para el documento: <strong th:text="${documentoFiltro}"></strong></span>
+                        </div>
+                        <div class="text-muted">
+                            Página <strong th:text="${paginaActual + 1}"></strong> de <strong th:text="${totalPaginas}"></strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Resultados -->
+            <div th:each="resultadoItem : ${resultadosConNiveles}" class="uts-card mb-4">
+                <div class="card-header">
+                    <div class="d-flex justify-between align-center">
+                        <div>
+                            <h3 class="card-title" th:text="${resultadoItem.resultado.estudiante.nombres + ' ' + resultadoItem.resultado.estudiante.apellidos}">
+                                Nombre Estudiante
+                            </h3>
+                            <p class="mb-0 text-muted">
+                                <strong>Documento:</strong> 
+                                <span th:text="${resultadoItem.resultado.estudiante.numeroDocumento}"></span> | 
+                                <strong>Prueba:</strong> 
+                                <span th:text="${resultadoItem.resultado.tipoPrueba == 'SABER_PRO' ? 'SABER PRO' : 'SABER T&T'}"></span> | 
+                                <strong>Periodo:</strong> 
+                                <span th:text="${resultadoItem.resultado.anioPrueba} + '-' + ${resultadoItem.resultado.periodo}"></span>
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <div class="puntaje-global text-primary" th:text="${resultadoItem.resultado.puntajeGlobal} + ' pts'">
+                                0 pts
+                            </div>
+                            <span class="estado-badge" 
+                                  th:classappend="${resultadoItem.resultado.estado == 'APROBADO'} ? 'badge-success' : (${resultadoItem.resultado.estado == 'REPROBADO'} ? 'badge-danger' : (${resultadoItem.resultado.estado == 'PENDIENTE'} ? 'badge-warning' : 'badge-secondary'))"
+                                  th:text="${resultadoItem.resultado.estado}">
+                                Estado
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Competencias -->
+                    <div class="competencias-grid">
+                        <div th:each="competenciaEntry : ${resultadoItem.competenciasConNivel}" class="competencia-card">
+                            <div class="competencia-header">
+                                <span class="competencia-nombre" th:text="${competenciaEntry.key}">Competencia</span>
+                                <div class="d-flex align-center gap-2">
+                                    <span class="puntaje-competencia" th:text="${competenciaEntry.value.puntaje} + ' pts'">0 pts</span>
+                                    <span class="nivel-badge" 
+                                          th:classappend="${competenciaEntry.value.claseNivel}"
+                                          th:text="${competenciaEntry.value.nivel}">
+                                        Nivel
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="barra-progreso">
+                                <div class="progreso-nivel" th:classappend="${'progreso-' + competenciaEntry.value.claseNivel.split('-')[1]}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Información adicional -->
+                    <div class="info-adicional">
+                        <div class="d-flex justify-between align-center text-sm text-muted">
+                            <div>
+                                <strong>Fecha de registro:</strong> 
+                                <span th:text="${#temporals.format(resultadoItem.resultado.fechaRegistro, 'dd/MM/yyyy HH:mm')}"></span>
+                                <span th:if="${resultadoItem.resultado.fechaActualizacion}">
+                                    | <strong>Última actualización:</strong> 
+                                    <span th:text="${#temporals.format(resultadoItem.resultado.fechaActualizacion, 'dd/MM/yyyy HH:mm')}"></span>
+                                </span>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn-icon btn-edit" 
+                                        th:attr="data-id=${resultadoItem.resultado.id}"
+                                        onclick="editarResultado(this.getAttribute('data-id'))"
+                                        title="Editar Resultado">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon btn-delete" 
+                                        th:attr="data-id=${resultadoItem.resultado.id}, 
+                                                 data-estudiante=${resultadoItem.resultado.estudiante.nombres + ' ' + resultadoItem.resultado.estudiante.apellidos}"
+                                        onclick="eliminarResultado(this.getAttribute('data-id'), this.getAttribute('data-estudiante'))"
+                                        title="Eliminar Resultado">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div th:if="${resultadoItem.resultado.observaciones}" class="mt-2">
+                            <strong>Observaciones:</strong> 
+                            <span th:text="${resultadoItem.resultado.observaciones}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mensaje sin resultados -->
+            <div th:if="${resultadosConNiveles.empty}" class="uts-card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No se encontraron resultados</h4>
+                    <p th:if="${documentoFiltro}" class="text-muted">
+                        No hay resultados para el documento: <strong th:text="${documentoFiltro}"></strong>
+                    </p>
+                    <p th:unless="${documentoFiltro}" class="text-muted">
+                        No hay resultados registrados en el sistema.
+                    </p>
+                    <button onclick="mostrarModalResultado()" class="btn btn-primary mt-2">
+                        <i class="fas fa-plus"></i> Registrar Primer Resultado
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Paginación Mejorada -->
+            <div class="pagination" th:if="${totalPaginas > 1}">
+                <div class="pagination-controls">
+                    <!-- Botón Anterior -->
+                    <button class="btn btn-outline btn-sm" 
+                            th:disabled="${paginaActual == 0}"
+                            th:onclick="${paginaActual > 0} ? 'cambiarPagina(' + (${paginaActual} - 1) + ')' : ''">
+                        <i class="fas fa-chevron-left"></i> Anterior
+                    </button>
+                    
+                    <!-- Números de página -->
+                    <div class="pagination-numbers">
+                        <span th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}">
+                            <button th:if="${(i >= paginaActual - 2 and i <= paginaActual + 2) or i == 0 or i == totalPaginas - 1}"
+                                    class="btn btn-sm" 
+                                    th:classappend="${i == paginaActual} ? 'btn-primary' : 'btn-outline'"
+                                    th:onclick="'cambiarPagina(' + ${i} + ')'"
+                                    th:text="${i + 1}">
+                            </button>
+                            <span th:if="${(i == paginaActual - 3 and paginaActual > 3) or (i == paginaActual + 3 and paginaActual < totalPaginas - 4)}"
+                                  class="pagination-ellipsis">...</span>
+                        </span>
+                    </div>
+                    
+                    <!-- Botón Siguiente -->
+                    <button class="btn btn-outline btn-sm" 
+                            th:disabled="${paginaActual == totalPaginas - 1}"
+                            th:onclick="${paginaActual < totalPaginas - 1} ? 'cambiarPagina(' + (${paginaActual} + 1) + ')' : ''">
+                        Siguiente <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para Resultados (se agregará con JavaScript) -->
+    <div id="modalResultado" class="modal">
+        <!-- El contenido del modal se cargará dinámicamente -->
+    </div>
+    
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    
+    <script th:src="@{/js/common.js}"></script>
+    <script th:src="@{/js/resultados.js}"></script>
+</body>
+</html>

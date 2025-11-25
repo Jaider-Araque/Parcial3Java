@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${usuario.username != null} ? 'Editar Usuario' : 'Nuevo Usuario'">Formulario Usuario</title>
+    <link th:href="@{/css/uts-theme.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <div class="main-layout">
+        <div th:replace="fragments/sidebar :: sidebar"></div>
+        
+        <main class="main-content">
+            <div class="uts-card">
+                <div class="card-header">
+                    <h1 class="card-title" th:text="${usuario.username != null} ? '✏️ Editar Usuario' : '👥 Nuevo Usuario'">
+                        Formulario Usuario
+                    </h1>
+                    <p th:if="${usuario.username == null}" class="text-muted">
+                        El username se generará automáticamente desde el email
+                    </p>
+                </div>
+
+                <!-- Alertas -->
+                <div th:if="${success}" class="alert alert-success">
+                    <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+                </div>
+                <div th:if="${error}" class="alert alert-danger">
+                    <i class="fas fa-times-circle"></i> <span th:text="${error}"></span>
+                </div>
+
+                <form th:action="@{/admin/usuarios/guardar}" th:object="${usuario}" method="post" id="usuarioForm">
+                    
+                    <!-- Campo oculto para username (se genera automáticamente o se mantiene en edición) -->
+                    <input type="hidden" th:field="*{username}" id="usernameField">
+                    
+                    <div class="form-grid">
+                        <!-- Email (campo principal) -->
+                        <div class="form-group">
+                            <label class="form-label">Email *</label>
+                            <input type="email" class="form-control" th:field="*{email}" 
+                                   id="emailInput" required
+                                   onblur="generarUsernameDesdeEmail()"
+                                   th:readonly="${usuario.username != null}">
+                            <small class="form-text text-muted" th:if="${usuario.username == null}">
+                                El username se generará automáticamente desde esta dirección
+                            </small>
+                            <small class="form-text text-muted" th:if="${usuario.username != null}">
+                                Email actual (no editable)
+                            </small>
+                        </div>
+
+                        <!-- Username (solo lectura, generado automáticamente) -->
+                        <div class="form-group">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" id="usernameDisplay" 
+                                   readonly 
+                                   th:attr="placeholder=${usuario.username == null} ? 'Se generará automáticamente' : 'Username actual'">
+                            <small class="form-text text-muted" th:if="${usuario.username == null}">
+                                Generado desde el email (no editable)
+                            </small>
+                            <small class="form-text text-muted" th:if="${usuario.username != null}">
+                                Username actual (no se puede modificar)
+                            </small>
+                        </div>
+
+                        <!-- Nombres -->
+                        <div class="form-group">
+                            <label class="form-label">Nombres *</label>
+                            <input type="text" class="form-control" th:field="*{nombres}" 
+                                   placeholder="Ingresa los nombres" required>
+                        </div>
+
+                        <!-- Apellidos -->
+                        <div class="form-group">
+                            <label class="form-label">Apellidos *</label>
+                            <input type="text" class="form-control" th:field="*{apellidos}" 
+                                   placeholder="Ingresa los apellidos" required>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="form-group">
+                            <label class="form-label">Password 
+                                <span th:if="${usuario.username == null}">*</span>
+                            </label>
+                            <input type="password" class="form-control" th:field="*{password}" 
+                                   id="passwordInput"
+                                   th:attr="placeholder=${usuario.username != null} ? 'Dejar vacío para mantener actual' : 'Ingresa la contraseña'">
+                            <small class="form-text text-muted" th:if="${usuario.username != null}">
+                                Dejar vacío para mantener la contraseña actual
+                            </small>
+                            <small class="form-text text-muted" th:if="${usuario.username == null}">
+                                La contraseña es requerida para nuevos usuarios
+                            </small>
+                        </div>
+
+                        <!-- Confirmar Password -->
+                        <div class="form-group">
+                            <label class="form-label">Confirmar Password 
+                                <span th:if="${usuario.username == null}">*</span>
+                            </label>
+                            <input type="password" class="form-control" name="confirmarPassword" 
+                                   id="confirmarPasswordInput"
+                                   th:required="${usuario.username == null}"
+                                   th:attr="placeholder=${usuario.username != null} ? 'Solo si cambias la contraseña' : 'Repite la contraseña'">
+                            <small class="form-text text-muted" th:if="${usuario.username != null}">
+                                Solo llena si deseas cambiar la contraseña
+                            </small>
+                            <small class="form-text text-muted" th:if="${usuario.username == null}">
+                                Debe coincidir con la contraseña anterior
+                            </small>
+                        </div>
+
+                        <!-- Rol -->
+                        <div class="form-group">
+                            <label class="form-label">Rol *</label>
+                            <select class="form-control" th:field="*{rol}" required>
+                                <option value="">Seleccionar rol</option>
+                                <option th:each="rol : ${roles}" 
+                                        th:value="${rol}" 
+                                        th:text="${rol}"
+                                        th:selected="${usuario.rol == rol}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Estado (solo para edición) -->
+                        <div class="form-group" th:if="${usuario.username != null}">
+                            <label class="form-label">Estado</label>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" th:field="*{activo}" id="activoCheck">
+                                <label class="form-check-label" for="activoCheck">Usuario activo</label>
+                            </div>
+                            <small class="form-text text-muted">
+                                Los usuarios inactivos no pueden iniciar sesión
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> 
+                            <span th:text="${usuario.username != null} ? 'Actualizar Usuario' : 'Crear Usuario'">Guardar</span>
+                        </button>
+                        <a th:href="@{/admin/usuarios}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                        
+                        <!-- Solo mostrar en edición -->
+                        <div th:if="${usuario.username != null}" class="ms-auto">
+                            <small class="text-muted">
+                                Usuario creado/modificado: 
+                                <span th:text="${usuario.username}"></span>
+                            </small>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+
+    <script>
+        // Generar username desde el email (solo para nuevos usuarios)
+        function generarUsernameDesdeEmail() {
+            const emailInput = document.getElementById('emailInput');
+            const usernameDisplay = document.getElementById('usernameDisplay');
+            const usernameField = document.getElementById('usernameField');
+            
+            // Solo generar si estamos creando un usuario nuevo (username vacío)
+            if (usernameField.value === '' && emailInput.value && emailInput.value.includes('@')) {
+                const username = emailInput.value.split('@')[0];
+                usernameDisplay.value = username;
+                usernameField.value = username;
+                
+                // Mostrar feedback visual
+                usernameDisplay.style.backgroundColor = '#e8f5e8';
+                setTimeout(() => {
+                    usernameDisplay.style.backgroundColor = '';
+                }, 1000);
+            }
+        }
+
+        // Inicialización cuando carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            const usernameField = document.getElementById('usernameField');
+            const usernameDisplay = document.getElementById('usernameDisplay');
+            const emailInput = document.getElementById('emailInput');
+            
+            // Si estamos editando, mostrar el username actual
+            if (usernameField && usernameField.value) {
+                usernameDisplay.value = usernameField.value;
+                usernameDisplay.style.backgroundColor = '#f8f9fa';
+            } else {
+                // Si es nuevo usuario, permitir generar username desde email
+                emailInput.addEventListener('input', function() {
+                    if (this.value.includes('@')) {
+                        generarUsernameDesdeEmail();
+                    }
+                });
+            }
+            
+            // Validar contraseñas antes de enviar el formulario
+            document.getElementById('usuarioForm').addEventListener('submit', function(e) {
+                const password = document.getElementById('passwordInput').value;
+                const confirmarPassword = document.getElementById('confirmarPasswordInput').value;
+                const esNuevoUsuario = !usernameField.value; // Si no hay username, es nuevo
+                
+                // Para usuarios nuevos, la contraseña es obligatoria
+                if (esNuevoUsuario && (!password || !confirmarPassword)) {
+                    e.preventDefault();
+                    alert('La contraseña y su confirmación son obligatorias para nuevos usuarios');
+                    return false;
+                }
+                
+                // Si se ingresó password, deben coincidir
+                if (password && password !== confirmarPassword) {
+                    e.preventDefault();
+                    alert('Las contraseñas no coinciden');
+                    return false;
+                }
+                
+                // Validar email
+                if (!emailInput.value || !emailInput.value.includes('@')) {
+                    e.preventDefault();
+                    alert('Por favor ingresa un email válido');
+                    return false;
+                }
+            });
+
+            // Mostrar/ocultar lógica para la confirmación de password
+            const passwordInput = document.getElementById('passwordInput');
+            const confirmarPasswordInput = document.getElementById('confirmarPasswordInput');
+            
+            passwordInput.addEventListener('input', function() {
+                if (this.value) {
+                    confirmarPasswordInput.required = true;
+                } else {
+                    confirmarPasswordInput.required = false;
+                }
+            });
+        });
+
+        // Función para mostrar/ocultar password
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+        }
+    </script>
+
+    <style>
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-start;
+            align-items: center;
+            border-top: 1px solid #eee;
+            padding-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        #usernameDisplay {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+            color: #6c757d;
+        }
+        .form-check-input {
+            margin-top: 0.2rem;
+        }
+        .text-muted {
+            font-size: 0.875rem;
+        }
+        @media (max-width: 768px) {
+            .form-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .form-actions .btn {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
+</body>
+</html>

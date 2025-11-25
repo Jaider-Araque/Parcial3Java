@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Perfil - Estudiante</title>
+    <link th:href="@{/css/uts-theme.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    
+    <div class="main-layout">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <main class="main-content">
+            <!-- Header -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h1 class="card-title">👤 Mi Perfil</h1>
+                    <p>Gestiona tu información personal y académica</p>
+                </div>
+            </div>
+
+            <div class="profile-layout">
+                <!-- Información del Perfil -->
+                <div class="uts-card">
+                    <div class="card-header">
+                        <h2 class="card-title">📝 Información Personal</h2>
+                    </div>
+                    
+                    <form class="profile-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Código Estudiantil</label>
+                                <input type="text" class="form-control" th:value="${estudiante.numeroDocumento}" readonly>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Nombre Completo</label>
+                                <input type="text" class="form-control" th:value="${estudiante.nombreCompleto}" readonly>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Tipo de Documento</label>
+                                <input type="text" class="form-control" value="Cédula de Ciudadanía" readonly>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Número de Documento</label>
+                                <input type="text" class="form-control" th:value="${estudiante.numeroDocumento}" readonly>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Fecha de Nacimiento</label>
+                                <input type="date" class="form-control" value="2000-05-15">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Teléfono</label>
+                                <input type="tel" class="form-control" value="+57 300 123 4567">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Correo Electrónico</label>
+                                <input type="email" class="form-control" th:value="${estudiante.email}" readonly>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Información Académica -->
+                <div class="uts-card">
+                    <div class="card-header">
+                        <h2 class="card-title">🎓 Información Académica</h2>
+                    </div>
+                    
+                    <div class="academic-info">
+                        <div class="info-item">
+                            <span class="info-label">Programa Académico:</span>
+                            <span class="info-value" th:text="${estudiante.programaAcademico}">Ingeniería de Software</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">Facultad:</span>
+                            <span class="info-value">Ingenierías</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">Semestre Actual:</span>
+                            <span class="info-value" th:text="${estudiante.semestre} + '° Semestre'">5° Semestre</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">Promedio Académico:</span>
+                            <span class="info-value">4.3 / 5.0</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">Estado:</span>
+                            <span class="info-value status-active">Activo</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">Fecha de Ingreso:</span>
+                            <span class="info-value">Enero 2022</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <span class="info-label">Fecha Estimada de Grado:</span>
+                            <span class="info-value">Diciembre 2025</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    <script th:src="@{/js/common.js}"></script>
+</body>
+
+<style>
+    .profile-layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+        align-items: start;
+    }
+    
+    .profile-layout > :nth-child(3),
+    .profile-layout > :nth-child(4) {
+        grid-column: 1 / -1;
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .full-width {
+        grid-column: 1 / -1;
+    }
+    
+    .academic-info {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+                align-items: center;
+        padding: 0.75rem;
+        background: var(--gris-claro);
+        border-radius: 8px;
+    }
+    
+    .info-label {
+        color: var(--texto-claro);
+        font-weight: 500;
+    }
+    
+    .info-value {
+        color: var(--texto-oscuro);
+        font-weight: 600;
+    }
+    
+    .status-active {
+        background: #e8f5e8;
+        color: #2e7d32;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .notifications-settings {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .setting-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: var(--gris-claro);
+        border-radius: 8px;
+    }
+    
+    .setting-info h4 {
+        margin: 0 0 0.5rem 0;
+        color: var(--texto-oscuro);
+    }
+    
+    .setting-info p {
+        margin: 0;
+        color: var(--texto-claro);
+        font-size: 0.9rem;
+    }
+    
+    /* Switch Toggle */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+    
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 34px;
+    }
+    
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+        background-color: var(--verde-lima);
+    }
+    
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+    
+    .password-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+    }
+    
+    .d-flex {
+        display: flex;
+    }
+    
+    .justify-between {
+        justify-content: space-between;
+    }
+    
+    .align-center {
+        align-items: center;
+    }
+    
+    .gap-1 {
+        gap: 1rem;
+    }
+</style>
+</html>

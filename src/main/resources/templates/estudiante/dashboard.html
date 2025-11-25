@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Estudiante - Saber Pro UTS</title>
+    <link th:href="@{/css/uts-theme.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+	<div th:replace="~{fragments/header :: header}"></div>    
+    <!-- Layout Principal -->
+    <div class="main-layout">
+        <!-- Sidebar Simple -->
+        <nav class="uts-sidebar">
+            <div class="sidebar-content">
+                <ul class="sidebar-nav">
+                    <li class="nav-item">
+                        <a href="/estudiante/dashboard" class="nav-link active">
+                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                            <span>Mi Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/estudiante/resultados" class="nav-link">
+                            <i class="nav-icon fas fa-chart-bar"></i>
+                            <span>Mis Resultados</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/estudiante/beneficios" class="nav-link">
+                            <i class="nav-icon fas fa-award"></i>
+                            <span>Mis Beneficios</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/estudiante/estadisticas" class="nav-link">
+                            <i class="nav-icon fas fa-chart-line"></i>
+                            <span>Estadísticas</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/estudiante/perfil" class="nav-link">
+                            <i class="nav-icon fas fa-user"></i>
+                            <span>Mi Perfil</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        
+        <!-- Contenido Principal -->
+        <main class="main-content">
+            <!-- Tarjeta de Bienvenida -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h1 class="card-title">🎓 Mi Panel Estudiantil</h1>
+                    <p>
+                        <strong th:text="${estudiante.programaAcademico}">Programa</strong> | 
+                        Semestre <span th:text="${estudiante.semestre}">0</span> | 
+                        <span th:text="${estudiante.tipoPrueba}">Tipo Prueba</span>
+                    </p>
+                </div>
+                
+                <!-- Estadísticas Personales -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-number" th:text="${totalPruebas}">0</div>
+                        <div class="stat-label">Pruebas Realizadas</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">⭐</div>
+                        <div class="stat-number" th:text="${promedioEstudiante} + '%'">0%</div>
+                        <div class="stat-label">Promedio General</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-number" th:text="${totalBeneficios}">0</div>
+                        <div class="stat-label">Beneficios Obtenidos</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-number" th:text="'#' + ${posicionPrograma}">#0</div>
+                        <div class="stat-label">Posición en Programa</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Menú de Acciones Rápidas -->
+            <div class="menu-grid">
+                <a href="/estudiante/resultados" class="menu-card">
+                    <div class="menu-icon">📊</div>
+                    <h3>Mis Resultados</h3>
+                    <p>Consultar resultados detallados de pruebas Saber Pro/T&T</p>
+                    <small th:if="${totalPruebas > 0}" th:text="'(' + ${totalPruebas} + ' pruebas)'"></small>
+                </a>
+                
+                <a href="/estudiante/beneficios" class="menu-card">
+                    <div class="menu-icon">💰</div>
+                    <h3>Mis Beneficios</h3>
+                    <p>Revisar beneficios académicos obtenidos</p>
+                    <small th:if="${totalBeneficios > 0}" th:text="'(' + ${totalBeneficios} + ' beneficios)'"></small>
+                </a>
+                
+                <a href="/estudiante/estadisticas" class="menu-card">
+                    <div class="menu-icon">📈</div>
+                    <h3>Estadísticas</h3>
+                    <p>Ver estadísticas comparativas de mi programa</p>
+                </a>
+                
+                <a href="/estudiante/perfil" class="menu-card">
+                    <div class="menu-icon">👤</div>
+                    <h3>Mi Perfil</h3>
+                    <p>Actualizar información personal y académica</p>
+                </a>
+            </div>
+            
+            <!-- Sección de Últimos Resultados - SIN LÓGICA COMPLEJA -->
+            <div class="uts-card mt-2">
+                <div class="card-header">
+                    <h2 class="card-title">📋 Últimos Resultados</h2>
+                </div>
+                <div class="activity-list">
+                    <!-- Resultado Saber Pro - SIMPLIFICADO -->
+                    <div class="activity-item" th:if="${ultimoSaberPro != null}">
+                        <div class="activity-icon bg-success" th:if="${ultimoSaberPro.estado.name() == 'APROBADO'}">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="activity-icon bg-danger" th:if="${ultimoSaberPro.estado.name() == 'REPROBADO'}">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div class="activity-icon bg-warning" th:if="${ultimoSaberPro.estado.name() != 'APROBADO' and ultimoSaberPro.estado.name() != 'REPROBADO'}">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p>
+                                <strong>Saber Pro - <span th:text="${ultimoSaberPro.anioPrueba} + '-' + ${ultimoSaberPro.periodo}">Año-Periodo</span></strong> - 
+                                <span th:text="${ultimoSaberPro.estado}">Estado</span>
+                            </p>
+                            <p class="activity-detail" th:text="'Puntaje: ' + ${ultimoSaberPro.puntajeGlobal} + ' puntos'">Puntaje</p>
+                            <span class="activity-time" th:text="${#temporals.format(ultimoSaberPro.fechaRegistro, 'dd/MM/yyyy')}">Fecha</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Resultado Saber T&T - SIMPLIFICADO -->
+                    <div class="activity-item" th:if="${ultimoSaberTT != null}">
+                        <div class="activity-icon bg-success" th:if="${ultimoSaberTT.estado.name() == 'APROBADO'}">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="activity-icon bg-danger" th:if="${ultimoSaberTT.estado.name() == 'REPROBADO'}">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div class="activity-icon bg-warning" th:if="${ultimoSaberTT.estado.name() != 'APROBADO' and ultimoSaberTT.estado.name() != 'REPROBADO'}">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p>
+                                <strong>Saber T&T - <span th:text="${ultimoSaberTT.anioPrueba} + '-' + ${ultimoSaberTT.periodo}">Año-Periodo</span></strong> - 
+                                <span th:text="${ultimoSaberTT.estado}">Estado</span>
+                            </p>
+                            <p class="activity-detail" th:text="'Puntaje: ' + ${ultimoSaberTT.puntajeGlobal} + ' puntos'">Puntaje</p>
+                            <span class="activity-time" th:text="${#temporals.format(ultimoSaberTT.fechaRegistro, 'dd/MM/yyyy')}">Fecha</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Mensaje si no hay resultados -->
+                    <div class="activity-item" th:if="${ultimoSaberPro == null and ultimoSaberTT == null}">
+                        <div class="activity-icon bg-secondary">
+                            <i class="fas fa-info"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p><strong>No hay resultados disponibles</strong></p>
+                            <span class="activity-time">Aún no has realizado pruebas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sección de Beneficios -->
+            <div class="uts-card mt-2" th:if="${totalBeneficios > 0}">
+                <div class="card-header">
+                    <h2 class="card-title">💰 Mis Beneficios</h2>
+                </div>
+                <div class="activity-list">
+                    <div class="activity-item" th:each="beneficio : ${beneficios}">
+                        <div class="activity-icon bg-success" th:if="${beneficio.activo}">
+                            <i class="fas fa-award"></i>
+                        </div>
+                        <div class="activity-icon bg-secondary" th:if="${not beneficio.activo}">
+                            <i class="fas fa-award"></i>
+                        </div>
+                        <div class="activity-content">
+                            <p><strong th:text="${beneficio.tipoBeneficio}">Tipo Beneficio</strong></p>
+                            <p class="activity-detail" th:text="'Nota: ' + ${beneficio.notaAsignada} + ' | Descuento: ' + ${beneficio.porcentajeDescuento} + '%'">Detalles</p>
+                            <span class="activity-time" th:text="${#temporals.format(beneficio.fechaAsignacion, 'dd/MM/yyyy')}">Fecha</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Footer Simple -->
+    <footer class="uts-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <p class="footer-text">
+                    Sistema de Gestión Saber Pro/T&T<br>
+                    Unidades Tecnológicas de Santander
+                </p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Unidades Tecnológicas de Santander. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script th:src="@{/js/dashboardestudiante.js}"></script>
+
+    <style>
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--gris-claro);
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .activity-item:hover {
+            background: var(--gris-medio);
+            transform: translateX(5px);
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .activity-content p {
+            margin: 0;
+            color: var(--texto-oscuro);
+        }
+        
+        .activity-detail {
+            font-size: 0.9rem;
+            color: var(--texto-claro);
+            margin: 0.2rem 0 !important;
+        }
+        
+        .activity-time {
+            font-size: 0.8rem;
+            color: var(--texto-claro);
+        }
+        
+        .bg-success { background: #28a745; }
+        .bg-danger { background: #dc3545; }
+        .bg-warning { background: #ffc107; }
+        .bg-secondary { background: #6c757d; }
+    </style>
+	<script th:src="@{/js/common.js}"></script>
+</body>
+</html>

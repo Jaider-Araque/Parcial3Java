@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión Estudiantes - Coordinación</title>
+    <link th:href="@{/css/uts-theme.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        /* Estilos para la tabla */
+        .uts-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+            background: white;
+        }
+
+        .uts-table th,
+        .uts-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .uts-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .uts-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .student-info strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .student-info small {
+            color: #6c757d;
+            font-size: 0.8rem;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: white;
+        }
+
+        .badge-pro {
+            background: #3498db;
+        }
+
+        .badge-tyt {
+            background: #e74c3c;
+        }
+
+        .semestre-badge {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .btn-edit {
+            color: #3498db;
+        }
+
+        .btn-edit:hover {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-view {
+            color: #27ae60;
+        }
+
+        .btn-view:hover {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-delete {
+            color: #e74c3c;
+        }
+
+        .btn-delete:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        /* Estilos para el MODAL - CORREGIDOS */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+            background: #f8f9fa;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #495057;
+            font-size: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #6c757d;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            padding: 1.5rem 2rem;
+            border-top: 1px solid #e9ecef;
+            background: #f8f9fa;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .form-text {
+            display: block;
+            margin-top: 0.25rem;
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    
+    <div class="main-layout">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <main class="main-content">
+            <!-- Header -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h1 class="card-title">
+                        <i class="fas fa-user-graduate"></i>
+                        👨‍🎓 Gestión de Estudiantes
+                    </h1>
+                    <p>Administrar estudiantes y sus datos académicos del sistema Saber Pro/T&T</p>
+                </div>
+            </div>
+
+            <!-- Barra de Herramientas -->
+            <div class="uts-card">
+                <div class="d-flex justify-between align-center">
+                    <div>
+                        <h3 class="card-title">Lista de Estudiantes</h3>
+                        <p class="mb-0">Total: <strong th:text="${totalEstudiantes} + ' estudiantes'">0 estudiantes</strong></p>
+                    </div>
+                    <div class="d-flex gap-1">
+                        <button class="btn btn-secondary" onclick="exportarEstudiantes()">
+                            <i class="fas fa-download"></i> Exportar
+                        </button>
+                        <button class="btn btn-primary" onclick="mostrarModalCrear()">
+                            <i class="fas fa-plus"></i> Agregar Estudiante
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros Mejorados -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-search"></i>
+                        🔍 Filtros de Búsqueda
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="filtroForm" th:action="@{/coordinacion/estudiantes}" method="get">
+                        <input type="hidden" name="pagina" id="paginaInput" th:value="${paginaActual}">
+                        
+                        <div class="filters-grid">
+                            <div class="form-group">
+                                <label class="form-label">Tipo de Prueba</label>
+                                <select class="form-control" name="tipoPrueba" id="tipoPruebaSelect">
+                                    <option value="">Todos los tipos</option>
+                                    <option value="SABER_PRO" 
+                                            th:selected="${param.tipoPrueba != null && param.tipoPrueba[0] == 'SABER_PRO'}">Saber PRO</option>
+                                    <option value="SABER_TYT" 
+                                            th:selected="${param.tipoPrueba != null && param.tipoPrueba[0] == 'SABER_TYT'}">Saber T&T</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Semestre</label>
+                                <select class="form-control" name="semestre" id="semestreSelect">
+                                    <option value="">Todos los semestres</option>
+                                    <option th:each="i : ${#numbers.sequence(1, 10)}" 
+                                            th:value="${i}" 
+                                            th:text="${i} + '°'"
+                                            th:selected="${param.semestre != null && param.semestre[0] == i}">
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Buscar por Documento</label>
+                                <div class="search-input-container">
+                                    <input type="text" class="form-control" name="documento" 
+                                           placeholder="Número de documento"
+                                           th:value="${param.documento != null ? param.documento[0] : ''}" id="documentoInput">
+                                    <button type="button" onclick="buscar()" class="search-btn">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Buscar por Nombre</label>
+                                <div class="search-input-container">
+                                    <input type="text" class="form-control" name="nombre" 
+                                           placeholder="Nombre o apellido"
+                                           th:value="${param.nombre != null ? param.nombre[0] : ''}" id="nombreInput">
+                                    <button type="button" onclick="buscar()" class="search-btn">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="filters-actions">
+                            <button type="button" onclick="buscar()" class="btn btn-primary">
+                                <i class="fas fa-filter"></i> Aplicar Filtros
+                            </button>
+                            <button type="button" onclick="limpiarFiltros()" class="btn btn-outline">
+                                <i class="fas fa-times"></i> Limpiar Filtros
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tabla de Estudiantes -->
+            <div class="uts-card">
+                <div class="table-responsive">
+                    <table class="uts-table">
+                        <thead>
+                            <tr>
+                                <th>Documento</th>
+                                <th>Nombre Completo</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Tipo Prueba</th>
+                                <th>Semestre</th>
+                                <th>Resultados</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="estudiante : ${estudiantes}">
+                                <td th:text="${estudiante.numeroDocumento}">123456789</td>
+                                <td>
+                                    <div class="student-info">
+                                        <strong th:text="${estudiante.nombres + ' ' + estudiante.apellidos}">Nombre Completo</strong>
+                                        <small th:text="${estudiante.programaAcademico}">Programa</small>
+                                    </div>
+                                </td>
+                                <td th:text="${estudiante.email}">email@example.com</td>
+                                <td>
+                                    <span th:if="${estudiante.numeroTelefono}" th:text="${estudiante.numeroTelefono}">3001234567</span>
+                                    <span th:unless="${estudiante.numeroTelefono}" class="text-muted">No registrado</span>
+                                </td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${estudiante.tipoPrueba?.name() == 'SABER_PRO'} ? 'badge-pro' : 'badge-tyt'"
+                                          th:text="${estudiante.tipoPrueba?.name() == 'SABER_PRO'} ? 'SABER PRO' : 'SABER T&T'">
+                                        SABER T&T
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="semestre-badge" th:text="${estudiante.semestre} + '°'">5°</span>
+                                </td>
+                                <td>
+                                    <span class="resultados-count" 
+                                          th:text="${#lists.size(estudiante.resultados)} + ' pruebas'">2 pruebas</span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-icon btn-edit" 
+                                                th:attr="data-documento=${estudiante.numeroDocumento}"
+                                                onclick="mostrarModalEditar(this.getAttribute('data-documento'))"
+                                                title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn-icon btn-view" 
+                                                th:attr="data-documento=${estudiante.numeroDocumento}"
+                                                onclick="verResultados(this.getAttribute('data-documento'))"
+                                                title="Ver Resultados">
+                                            <i class="fas fa-chart-bar"></i>
+                                        </button>
+                                        <button class="btn-icon btn-delete" 
+                                                th:attr="data-documento=${estudiante.numeroDocumento}, data-nombre=${estudiante.nombres + ' ' + estudiante.apellidos}"
+                                                onclick="eliminarEstudiante(this.getAttribute('data-documento'), this.getAttribute('data-nombre'))"
+                                                title="Eliminar">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${estudiantes.empty}">
+                                <td colspan="8" class="text-center text-muted py-4">
+                                    <i class="fas fa-user-slash fa-2x mb-2"></i>
+                                    <br>
+                                    No se encontraron estudiantes
+                                    <br>
+                                    <small th:if="${param.tipoPrueba != null || param.semestre != null || param.documento != null || param.nombre != null}">
+                                        Intenta con otros filtros de búsqueda
+                                    </small>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Paginación -->
+                <div class="pagination" th:if="${totalPaginas > 1}">
+                    <button class="btn btn-outline btn-sm" 
+                            th:disabled="${paginaActual == 0}"
+                            th:onclick="'cambiarPagina(' + (${paginaActual} - 1) + ')'">
+                        <i class="fas fa-chevron-left"></i> Anterior
+                    </button>
+                    
+                    <span class="pagination-info">
+                        Página 
+                        <strong th:text="${paginaActual + 1}">1</strong> 
+                        de 
+                        <strong th:text="${totalPaginas}">10</strong>
+                        • 
+                        <span th:text="${totalElementos} + ' estudiantes'">250 estudiantes</span>
+                    </span>
+                    
+                    <button class="btn btn-outline btn-sm" 
+                            th:disabled="${paginaActual == totalPaginas - 1}"
+                            th:onclick="'cambiarPagina(' + (${paginaActual} + 1) + ')'">
+                        Siguiente <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modal para Crear/Editar Estudiante - CORREGIDO -->
+    <div id="modalEstudiante" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitulo">Agregar Estudiante</h3>
+                <button class="modal-close" onclick="cerrarModal()">&times;</button>
+            </div>
+            <form id="formEstudiante" th:action="@{/coordinacion/estudiantes/guardar}" method="post" onsubmit="return enviarFormulario(event)">
+                <div class="modal-body">
+                    <!-- ✅ CORREGIDO: Cambiar name a algo diferente -->
+                    <input type="hidden" id="estudianteId" name="idEstudiante">
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Número de Documento *</label>
+                            <input type="text" class="form-control" id="documento" name="numeroDocumento" required
+                                   placeholder="Ej: 123456789" maxlength="20"
+                                   oninput="validarDocumento(this)">
+                            <small class="form-text text-muted">Este será el ID único del estudiante</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Nombres *</label>
+                            <input type="text" class="form-control" id="nombres" name="nombres" required
+                                   placeholder="Nombres completos">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Apellidos *</label>
+                            <input type="text" class="form-control" id="apellidos" name="apellidos" required
+                                   placeholder="Apellidos completos">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="email" name="email" required
+                                   placeholder="correo@ejemplo.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" id="telefono" name="numeroTelefono"
+                                   placeholder="3001234567">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Programa Académico *</label>
+                            <select class="form-control" id="programa" name="programaAcademico" required>
+                                <option value="">Seleccione programa</option>
+                                <option value="Ingeniería de Software">Ingeniería de Software</option>
+                                <option value="Tecnología en Sistemas">Tecnología en Sistemas</option>
+                                <option value="Administración">Administración</option>
+                                <option value="Contaduría Pública">Contaduría Pública</option>
+                                <option value="Diseño Gráfico">Diseño Gráfico</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Semestre *</label>
+                            <select class="form-control" id="semestre" name="semestre" required>
+                                <option value="">Seleccione semestre</option>
+                                <option th:each="i : ${#numbers.sequence(1, 10)}" 
+                                        th:value="${i}" 
+                                        th:text="${i} + '°'">
+                                </option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Tipo de Prueba *</label>
+                            <select class="form-control" id="tipoPrueba" name="tipoPrueba" required>
+                                <option value="">Seleccione tipo</option>
+                                <option value="SABER_PRO">Saber PRO</option>
+                                <option value="SABER_TYT">Saber T&T</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="btnGuardar">
+                        <i class="fas fa-save"></i> Guardar Estudiante
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    
+    <!-- Incluir el JavaScript -->
+    <script th:src="@{/js/common.js}"></script>
+    <script th:src="@{/js/estudiantes.js}"></script>
+</body>
+</html>

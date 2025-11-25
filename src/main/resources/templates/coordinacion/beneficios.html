@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Beneficios - Coordinación</title>
+    <link th:href="@{/css/uts-theme.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            border-left: 4px solid var(--verde-lima);
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--texto-oscuro);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: var(--texto-claro);
+            font-size: 0.9rem;
+        }
+        
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .menu-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+        
+        .menu-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            border-color: var(--verde-lima);
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .menu-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .menu-card h3 {
+            margin: 0 0 0.5rem 0;
+            color: var(--texto-oscuro);
+        }
+        
+        .menu-card p {
+            margin: 0;
+            color: var(--texto-claro);
+            font-size: 0.9rem;
+        }
+        
+        .uts-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+        
+        .uts-table th,
+        .uts-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--gris-medio);
+        }
+        
+        .uts-table th {
+            background: var(--gris-claro);
+            font-weight: 600;
+            color: var(--texto-oscuro);
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .status-pending {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        .status-inactive {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .status-no-beneficio {
+            background: #f5f5f5;
+            color: #757575;
+        }
+        
+        .status-debe-repetir {
+            background: #fff3e0;
+            color: #ff8f00;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-icon {
+            background: none;
+            border: none;
+            color: var(--texto-claro);
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .btn-icon:hover {
+            background: var(--gris-medio);
+            color: var(--texto-oscuro);
+        }
+        
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .benefit-card {
+            background: var(--gris-claro);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 4px solid var(--verde-lima);
+        }
+        
+        .benefit-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .benefit-card h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--texto-oscuro);
+        }
+        
+        .benefit-card p {
+            margin: 0 0 1rem 0;
+            color: var(--texto-claro);
+            font-size: 0.9rem;
+        }
+        
+        .benefit-count {
+            background: var(--verde-lima);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .search-input-container {
+            position: relative;
+        }
+        
+        .search-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+        }
+        
+        .filters-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            margin-top: 2rem;
+            border-top: 1px solid #dee2e6;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+        
+        .pagination-numbers {
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+        }
+        
+        .pagination-ellipsis {
+            padding: 0.5rem;
+            color: #6c757d;
+        }
+        
+        .text-muted {
+            color: #6c757d !important;
+        }
+        
+        .text-sm {
+            font-size: 0.875rem;
+        }
+        
+        .d-flex {
+            display: flex;
+        }
+        
+        .justify-between {
+            justify-content: space-between;
+        }
+        
+        .align-center {
+            align-items: center;
+        }
+        
+        .gap-2 {
+            gap: 0.5rem;
+        }
+        
+        .mb-4 {
+            margin-bottom: 1.5rem;
+        }
+        
+        .mb-0 {
+            margin-bottom: 0;
+        }
+        
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+        
+        .py-5 {
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .pagination-controls {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .pagination-numbers {
+                order: -1;
+            }
+            
+            .filters-actions {
+                flex-direction: column;
+            }
+        }
+
+        .beneficio-detail {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .beneficio-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .sin-beneficios {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            color: #856404;
+        }
+
+        .prueba-anulada {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            color: #721c24;
+        }
+
+        .debe-repetir {
+            background: #fff3e0;
+            border: 1px solid #ffcc80;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            color: #e65100;
+        }
+
+        .no-califica {
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            color: #757575;
+        }
+
+        .analisis-section {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .analisis-title {
+            font-weight: 600;
+            color: #1565c0;
+            margin-bottom: 0.5rem;
+        }
+
+        .analisis-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+
+        .analisis-label {
+            font-weight: 500;
+            color: #424242;
+        }
+
+        .analisis-value {
+            color: #616161;
+        }
+    </style>
+</head>
+<body>
+    <!-- ✅ CORREGIDO: Usar sintaxis completa de fragment expressions -->
+    <div th:replace="~{fragments/header :: header}"></div>
+    
+    <div class="main-layout">
+        <!-- ✅ CORREGIDO: Usar sintaxis completa de fragment expressions -->
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <main class="main-content">
+            <!-- Header -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h1 class="card-title">💰 Gestión de Beneficios</h1>
+                    <p>Beneficios académicos automáticos según el Acuerdo 01-009 - Solo para pruebas APROBADAS</p>
+                </div>
+            </div>
+
+            <!-- Estadísticas Rápidas -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🎁</div>
+                    <div class="stat-number" th:text="${totalBeneficios}">0</div>
+                    <div class="stat-label">Total Beneficios</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-number" th:text="${beneficiosActivos}">0</div>
+                    <div class="stat-label">Beneficios Activos</div>
+                </div>
+                
+                <!-- ✅ MODIFICADO: Cambiar Tasa de Asignación por Estudiantes sin Beneficios -->
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-number" th:text="${estudiantesSinBeneficios}">0</div>
+                    <div class="stat-label">Estudiantes sin Beneficios</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">🎓</div>
+                    <div class="stat-number" th:text="${totalEstudiantes}">0</div>
+                    <div class="stat-label">Estudiantes Registrados</div>
+                </div>
+            </div>
+
+            <!-- Acciones Principales -->
+            <!-- ✅ MODIFICADO: Quitar la tarjeta de Análisis Individual -->
+            <div class="menu-grid">
+                <div class="menu-card" onclick="calcularBeneficiosAutomaticos()">
+                    <div class="menu-icon">⚡</div>
+                    <h3>Calcular Beneficios Automáticos</h3>
+                    <p>Calcular beneficios para todos los estudiantes con pruebas aprobadas según el Acuerdo 01-009</p>
+                </div>
+                
+                <a th:href="@{/coordinacion/resultados}" class="menu-card">
+                    <div class="menu-icon">📋</div>
+                    <h3>Ver Resultados</h3>
+                    <p>Revisar resultados de pruebas de estudiantes</p>
+                </a>
+                
+                <!-- ✅ ELIMINADO: Tarjeta de Análisis Individual -->
+            </div>
+
+            <!-- Información de Condiciones -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-info-circle"></i>
+                        📋 Condiciones para Beneficios - Acuerdo 01-009
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="beneficio-info">
+                        <div class="info-item">
+                            <span class="info-label">✅ Requisito Previo</span>
+                            <span class="info-value">Prueba debe estar en estado APROBADO</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">🚫 Exclusividad</span>
+                            <span class="info-value">No aplica para pruebas reprobadas o anuladas</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-2">
+                        <h5>Para SABER T&T (0-200 puntos):</h5>
+                        <ul class="text-sm text-muted">
+                            <li><strong>120-150 puntos:</strong> Exoneración trabajo grado + Nota 4.5</li>
+                            <li><strong>151-170 puntos:</strong> Exoneración + 50% derechos grado + Nota 4.7</li>
+                            <li><strong>>171 puntos:</strong> Exoneración + 100% derechos grado + Nota 5.0</li>
+                            <li><strong><80 puntos:</strong> Debe repetir prueba</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mt-2">
+                        <h5>Para SABER PRO (0-300 puntos):</h5>
+                        <ul class="text-sm text-muted">
+                            <li><strong>180-210 puntos:</strong> Exoneración trabajo grado + Nota 4.5</li>
+                            <li><strong>211-240 puntos:</strong> Exoneración + 50% derechos grado + Nota 4.7</li>
+                            <li><strong>>241 puntos:</strong> Exoneración + 100% derechos grado + Nota 5.0</li>
+                            <li><strong>≤120 puntos:</strong> Debe repetir prueba</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-search"></i>
+                        🔍 Buscar Beneficios
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="filtroForm" th:action="@{/coordinacion/beneficios}" method="get">
+                        <input type="hidden" name="pagina" id="paginaInput" value="0">
+                        
+                        <div class="filters-grid">
+                            <div class="form-group">
+                                <label class="form-label">Buscar por Documento</label>
+                                <div class="search-input-container">
+                                    <input type="text" class="form-control" name="documento" 
+                                           placeholder="Número de documento"
+                                           th:value="${documentoFiltro}" id="documentoInput">
+                                    <button type="button" onclick="buscar()" class="search-btn">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                                <small class="form-text text-muted" th:if="${estudianteFiltrado}">
+                                    Mostrando beneficios de: 
+                                    <strong th:text="${estudianteFiltrado.nombres + ' ' + estudianteFiltrado.apellidos}"></strong>
+                                </small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Tipo de Beneficio</label>
+                                <select class="form-control" name="tipoBeneficio" onchange="this.form.submit()">
+                                    <option value="">Todos los tipos</option>
+                                    <option value="EXONERACION_TRABAJO_GRADO" th:selected="${tipoBeneficioFiltro == 'EXONERACION_TRABAJO_GRADO'}">Exoneración Trabajo Grado</option>
+                                    <option value="DESCUENTO_50_DERECHOS_GRADO" th:selected="${tipoBeneficioFiltro == 'DESCUENTO_50_DERECHOS_GRADO'}">Descuento 50%</option>
+                                    <option value="DESCUENTO_100_DERECHOS_GRADO" th:selected="${tipoBeneficioFiltro == 'DESCUENTO_100_DERECHOS_GRADO'}">Descuento 100%</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="filters-actions">
+                            <button type="button" onclick="buscar()" class="btn btn-primary">
+                                <i class="fas fa-filter"></i> Aplicar Filtros
+                            </button>
+                            <a th:href="@{/coordinacion/beneficios}" class="btn btn-outline">
+                                <i class="fas fa-times"></i> Limpiar Filtros
+                            </a>
+                            <!-- ✅ ELIMINADO: Botón de Análisis Individual -->
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Información de Resultados -->
+            <div class="uts-card" th:if="${!beneficiosConDetalles.empty}">
+                <div class="card-body">
+                    <div class="d-flex justify-between align-center">
+                        <div>
+                            <strong th:text="${totalElementos}"></strong> beneficios encontrados
+                            <span th:if="${documentoFiltro}">para el documento: <strong th:text="${documentoFiltro}"></strong></span>
+                        </div>
+                        <div class="text-muted">
+                            Página <strong th:text="${paginaActual + 1}"></strong> de <strong th:text="${totalPaginas}"></strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Beneficios -->
+            <div th:each="beneficioItem : ${beneficiosConDetalles}" class="uts-card mb-4">
+                <div class="card-header">
+                    <div class="d-flex justify-between align-center">
+                        <div>
+                            <h3 class="card-title" th:text="${beneficioItem.estudiante.nombres + ' ' + beneficioItem.estudiante.apellidos}">
+                                Nombre Estudiante
+                            </h3>
+                            <p class="mb-0 text-muted">
+                                <strong>Documento:</strong> 
+                                <span th:text="${beneficioItem.estudiante.numeroDocumento}"></span> | 
+                                <strong>Programa:</strong> 
+                                <span th:text="${beneficioItem.estudiante.programaAcademico}"></span> | 
+                                <strong>Semestre:</strong> 
+                                <span th:text="${beneficioItem.estudiante.semestre}"></span>
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <span class="status-badge" 
+                                  th:classappend="${beneficioItem.beneficio.activo} ? 'status-active' : 'status-inactive'"
+                                  th:text="${beneficioItem.beneficio.activo} ? 'ACTIVO' : 'INACTIVO'">
+                                Estado
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Información del Beneficio -->
+                    <div class="beneficio-detail">
+                        <div class="beneficio-info">
+                            <div class="info-item">
+                                <span class="info-label">Tipo de Beneficio</span>
+                                <span class="info-value" th:text="${beneficioItem.descripcionBeneficio}">
+                                    Tipo de beneficio
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Nota Asignada</span>
+                                <span class="info-value" th:text="${beneficioItem.beneficio.notaAsignada} + ' / 5.0'">
+                                    0.0 / 5.0
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Descuento</span>
+                                <span class="info-value" th:text="${beneficioItem.beneficio.porcentajeDescuento} + '%'">
+                                    0%
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Fecha Asignación</span>
+                                <span class="info-value" th:text="${#temporals.format(beneficioItem.beneficio.fechaAsignacion, 'dd/MM/yyyy')}">
+                                    Fecha
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Información de la Prueba que generó el beneficio -->
+                        <div th:if="${beneficioItem.resultado != null}" class="mt-2">
+                            <strong>Prueba que generó el beneficio:</strong><br>
+                            <span class="text-sm text-muted">
+                                <strong>Tipo:</strong> 
+                                <span th:text="${beneficioItem.resultado.tipoPrueba == 'SABER_PRO' ? 'SABER PRO' : 'SABER T&T'}"></span> | 
+                                <strong>Puntaje:</strong> 
+                                <span th:text="${beneficioItem.resultado.puntajeGlobal} + ' pts'"></span> | 
+                                <strong>Periodo:</strong> 
+                                <span th:text="${beneficioItem.resultado.anioPrueba} + '-' + ${beneficioItem.resultado.periodo}"></span> |
+                                <strong>Estado:</strong> 
+                                <span th:text="${beneficioItem.resultado.estado}"></span>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Acciones -->
+                    <div class="d-flex justify-between align-center text-sm text-muted mt-2">
+                        <div>
+                            <strong>Última actualización:</strong> 
+                            <span th:text="${#temporals.format(beneficioItem.beneficio.fechaAsignacion, 'dd/MM/yyyy')}"></span>
+                        </div>
+                        <div class="action-buttons">
+                            <button th:if="${beneficioItem.beneficio.activo}" 
+                                    class="btn-icon btn-delete" 
+                                    th:attr="data-id=${beneficioItem.beneficio.id}, 
+                                             data-estudiante=${beneficioItem.estudiante.nombres + ' ' + beneficioItem.estudiante.apellidos}"
+                                    onclick="desactivarBeneficio(this.getAttribute('data-id'), this.getAttribute('data-estudiante'))"
+                                    title="Desactivar Beneficio">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <button th:unless="${beneficioItem.beneficio.activo}" 
+                                    class="btn-icon btn-success" 
+                                    th:attr="data-id=${beneficioItem.beneficio.id}, 
+                                             data-estudiante=${beneficioItem.estudiante.nombres + ' ' + beneficioItem.estudiante.apellidos}"
+                                    onclick="activarBeneficio(this.getAttribute('data-id'), this.getAttribute('data-estudiante'))"
+                                    title="Activar Beneficio">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mensaje sin beneficios -->
+            <div th:if="${beneficiosConDetalles.empty}" class="uts-card">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-gift fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No se encontraron beneficios</h4>
+                    <p th:if="${documentoFiltro}" class="text-muted">
+                        No hay beneficios asignados para el documento: <strong th:text="${documentoFiltro}"></strong>
+                    </p>
+                    <p th:unless="${documentoFiltro}" class="text-muted">
+                        No hay beneficios registrados en el sistema.
+                    </p>
+                    <button onclick="calcularBeneficiosAutomaticos()" class="btn btn-primary mt-2">
+                        <i class="fas fa-bolt"></i> Calcular Beneficios Automáticos
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Paginación Mejorada -->
+            <div class="pagination" th:if="${totalPaginas > 1}">
+                <div class="pagination-controls">
+                    <!-- Botón Anterior -->
+                    <button class="btn btn-outline btn-sm" 
+                            th:disabled="${paginaActual == 0}"
+                            th:onclick="${paginaActual > 0} ? 'cambiarPagina(' + (${paginaActual} - 1) + ')' : ''">
+                        <i class="fas fa-chevron-left"></i> Anterior
+                    </button>
+                    
+                    <!-- Números de página -->
+                    <div class="pagination-numbers">
+                        <span th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}">
+                            <button th:if="${(i >= paginaActual - 2 and i <= paginaActual + 2) or i == 0 or i == totalPaginas - 1}"
+                                    class="btn btn-sm" 
+                                    th:classappend="${i == paginaActual} ? 'btn-primary' : 'btn-outline'"
+                                    th:onclick="'cambiarPagina(' + ${i} + ')'"
+                                    th:text="${i + 1}">
+                            </button>
+                            <span th:if="${(i == paginaActual - 3 and paginaActual > 3) or (i == paginaActual + 3 and paginaActual < totalPaginas - 4)}"
+                                  class="pagination-ellipsis">...</span>
+                        </span>
+                    </div>
+                    
+                    <!-- Botón Siguiente -->
+                    <button class="btn btn-outline btn-sm" 
+                            th:disabled="${paginaActual == totalPaginas - 1}"
+                            th:onclick="${paginaActual < totalPaginas - 1} ? 'cambiarPagina(' + (${paginaActual} + 1) + ')' : ''">
+                        Siguiente <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tipos de Beneficios -->
+            <div class="uts-card mt-4">
+                <div class="card-header">
+                    <h2 class="card-title">📋 Tipos de Beneficios Disponibles</h2>
+                </div>
+                <div class="benefits-grid">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">🎓</div>
+                        <h4>Exoneración Trabajo Grado</h4>
+                        <p>Exoneración del trabajo de grado + Nota 4.5</p>
+                        <span class="benefit-count" th:text="${countExoneracion} + ' asignados'">0 asignados</span>
+                    </div>
+                    
+                    <div class="benefit-card">
+                        <div class="benefit-icon">💰</div>
+                        <h4>Descuento 50%</h4>
+                        <p>Exoneración + 50% derechos de grado + Nota 4.7</p>
+                        <span class="benefit-count" th:text="${countDescuento50} + ' asignados'">0 asignados</span>
+                    </div>
+                    
+                    <div class="benefit-card">
+                        <div class="benefit-icon">💯</div>
+                        <h4>Descuento 100%</h4>
+                        <p>Exoneración + 100% derechos de grado + Nota 5.0</p>
+                        <span class="benefit-count" th:text="${countDescuento100} + ' asignados'">0 asignados</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ✅ ELIMINADO: Modal para Análisis -->
+    
+    <!-- ✅ CORREGIDO: Usar sintaxis completa de fragment expressions -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    <script th:src="@{/js/common.js}"></script>
+    <script th:src="@{/js/beneficios.js}"></script>
+</body>
+</html>

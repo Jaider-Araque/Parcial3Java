@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Resultados - Estudiante</title>
+    <link th:href="@{/css/uts-theme.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    
+    <div class="main-layout">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <main class="main-content">
+            <!-- Header -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h1 class="card-title">📊 Mis Resultados</h1>
+                    <p>Consulta tus resultados de pruebas Saber Pro/T&T</p>
+                </div>
+            </div>
+
+            <!-- Resumen de Resultados -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-number" th:text="${totalPruebas}">0</div>
+                    <div class="stat-label">Pruebas Realizadas</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-number" th:text="${promedioGeneral} + '%'">0%</div>
+                    <div class="stat-label">Promedio General</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-number" th:text="${mejoria} + '%'">0%</div>
+                    <div class="stat-label">Mejoría vs Anterior</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-number" th:text="'#' + ${posicionPrograma}">#0</div>
+                    <div class="stat-label">Posición en Programa</div>
+                </div>
+            </div>
+
+            <!-- Resultados Detallados -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h2 class="card-title">📋 Historial de Resultados</h2>
+                </div>
+                
+                <!-- Resultados de Saber Pro -->
+                <div th:each="prueba : ${pruebasSaberPro}">
+                    <div class="result-item">
+                        <div class="result-header">
+                            <div class="result-info">
+                                <h3 th:text="'Saber Pro - ' + ${prueba.anioPrueba} + '-' + ${prueba.periodo}"></h3>
+                                <span class="result-date" th:text="'Publicado: ' + ${#temporals.format(prueba.fechaRegistro, 'dd/MM/yyyy')}"></span>
+                            </div>
+                            <div class="result-score">
+                                <!-- Color del badge según puntaje -->
+                                <span th:if="${prueba.puntajeGlobal >= 240}" class="score-badge score-excellent" th:text="${prueba.puntajeGlobal} + ' pts'"></span>
+                                <span th:if="${prueba.puntajeGlobal >= 180 and prueba.puntajeGlobal < 240}" class="score-badge score-good" th:text="${prueba.puntajeGlobal} + ' pts'"></span>
+                                <span th:if="${prueba.puntajeGlobal < 180}" class="score-badge score-average" th:text="${prueba.puntajeGlobal} + ' pts'"></span>
+                                
+                                <!-- Color del estado -->
+                                <span th:if="${prueba.estado.name() == 'APROBADO'}" class="score-status text-success" th:text="${prueba.estado}"></span>
+                                <span th:if="${prueba.estado.name() == 'REPROBADO'}" class="score-status text-danger" th:text="${prueba.estado}"></span>
+                                <span th:if="${prueba.estado.name() != 'APROBADO' and prueba.estado.name() != 'REPROBADO'}" class="score-status text-warning" th:text="${prueba.estado}"></span>
+                            </div>
+                        </div>
+                        <div class="result-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Puntaje Global:</span>
+                                <span class="detail-value" th:text="${prueba.puntajeGlobal} + '/300'"></span>
+                            </div>
+                            
+                            <!-- Nivel Global según fórmula Excel -->
+                            <div class="detail-item">
+                                <span class="detail-label">Nivel Global:</span>
+                                <span class="detail-value">
+                                    <span th:if="${prueba.puntajeGlobal >= 191 and prueba.puntajeGlobal <= 300}" class="nivel-badge nivel-4">Nivel 4</span>
+                                    <span th:if="${prueba.puntajeGlobal >= 156 and prueba.puntajeGlobal <= 190}" class="nivel-badge nivel-3">Nivel 3</span>
+                                    <span th:if="${prueba.puntajeGlobal >= 126 and prueba.puntajeGlobal <= 155}" class="nivel-badge nivel-2">Nivel 2</span>
+                                    <span th:if="${prueba.puntajeGlobal >= 0 and prueba.puntajeGlobal <= 125}" class="nivel-badge nivel-1">Nivel 1</span>
+                                </span>
+                            </div>
+                            
+                            <!-- Competencias específicas para Saber Pro con niveles -->
+                            <div th:each="competencia : ${prueba.competencias}">
+                                <div class="detail-item competencia-item">
+                                    <span class="detail-label" th:text="${competencia.key} + ':'"></span>
+                                    <span class="detail-value">
+                                        <span th:text="${competencia.value} + ' pts'"></span>
+                                        <span th:if="${competencia.value >= 191 and competencia.value <= 300}" class="nivel-mini nivel-4">N4</span>
+                                        <span th:if="${competencia.value >= 156 and competencia.value <= 190}" class="nivel-mini nivel-3">N3</span>
+                                        <span th:if="${competencia.value >= 126 and competencia.value <= 155}" class="nivel-mini nivel-2">N2</span>
+                                        <span th:if="${competencia.value >= 0 and competencia.value <= 125}" class="nivel-mini nivel-1">N1</span>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-item">
+                                <span class="detail-label">Año:</span>
+                                <span class="detail-value" th:text="${prueba.anioPrueba}"></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Periodo:</span>
+                                <span class="detail-value" th:text="${prueba.periodo}"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Botones de acción -->
+                        <div class="result-actions">
+                            <button class="btn btn-outline btn-sm" th:attr="onclick='descargarCertificado(' + ${prueba.id} + ')'">
+                                <i class="fas fa-download"></i> Descargar Certificado
+                            </button>
+                            <button class="btn btn-outline btn-sm" th:attr="onclick='verGraficas(' + ${prueba.id} + ')'">
+                                <i class="fas fa-chart-bar"></i> Ver Gráficas
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resultados de Saber T&T -->
+                <div th:each="prueba : ${pruebasSaberTT}">
+                    <div class="result-item">
+                        <div class="result-header">
+                            <div class="result-info">
+                                <h3 th:text="'Saber T&T - ' + ${prueba.anioPrueba} + '-' + ${prueba.periodo}"></h3>
+                                <span class="result-date" th:text="'Publicado: ' + ${#temporals.format(prueba.fechaRegistro, 'dd/MM/yyyy')}"></span>
+                            </div>
+                            <div class="result-score">
+                                <!-- Color del badge según puntaje -->
+                                <span th:if="${prueba.puntajeGlobal >= 170}" class="score-badge score-excellent" th:text="${prueba.puntajeGlobal} + ' pts'"></span>
+                                <span th:if="${prueba.puntajeGlobal >= 120 and prueba.puntajeGlobal < 170}" class="score-badge score-good" th:text="${prueba.puntajeGlobal} + ' pts'"></span>
+                                <span th:if="${prueba.puntajeGlobal < 120}" class="score-badge score-average" th:text="${prueba.puntajeGlobal} + ' pts'"></span>
+                                
+                                <!-- Color del estado -->
+                                <span th:if="${prueba.estado.name() == 'APROBADO'}" class="score-status text-success" th:text="${prueba.estado}"></span>
+                                <span th:if="${prueba.estado.name() == 'REPROBADO'}" class="score-status text-danger" th:text="${prueba.estado}"></span>
+                                <span th:if="${prueba.estado.name() != 'APROBADO' and prueba.estado.name() != 'REPROBADO'}" class="score-status text-warning" th:text="${prueba.estado}"></span>
+                            </div>
+                        </div>
+                        <div class="result-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Puntaje Global:</span>
+                                <span class="detail-value" th:text="${prueba.puntajeGlobal} + '/200'"></span>
+                            </div>
+                            
+                            <!-- Nivel Global según fórmula Excel -->
+                            <div class="detail-item">
+                                <span class="detail-label">Nivel Global:</span>
+                                <span class="detail-value">
+                                    <span th:if="${prueba.puntajeGlobal >= 128 and prueba.puntajeGlobal <= 200}" class="nivel-badge nivel-4">Nivel 4</span>
+                                    <span th:if="${prueba.puntajeGlobal >= 104 and prueba.puntajeGlobal <= 127}" class="nivel-badge nivel-3">Nivel 3</span>
+                                    <span th:if="${prueba.puntajeGlobal >= 84 and prueba.puntajeGlobal <= 103}" class="nivel-badge nivel-2">Nivel 2</span>
+                                    <span th:if="${prueba.puntajeGlobal >= 0 and prueba.puntajeGlobal <= 83}" class="nivel-badge nivel-1">Nivel 1</span>
+                                </span>
+                            </div>
+                            
+                            <!-- Competencias específicas para Saber T&T con niveles -->
+                            <div th:each="competencia : ${prueba.competencias}">
+                                <div class="detail-item competencia-item">
+                                    <span class="detail-label" th:text="${competencia.key} + ':'"></span>
+                                    <span class="detail-value">
+                                        <span th:text="${competencia.value} + ' pts'"></span>
+                                        <span th:if="${competencia.value >= 128 and competencia.value <= 200}" class="nivel-mini nivel-4">N4</span>
+                                        <span th:if="${competencia.value >= 104 and competencia.value <= 127}" class="nivel-mini nivel-3">N3</span>
+                                        <span th:if="${competencia.value >= 84 and competencia.value <= 103}" class="nivel-mini nivel-2">N2</span>
+                                        <span th:if="${competencia.value >= 0 and competencia.value <= 83}" class="nivel-mini nivel-1">N1</span>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="detail-item">
+                                <span class="detail-label">Año:</span>
+                                <span class="detail-value" th:text="${prueba.anioPrueba}"></span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Periodo:</span>
+                                <span class="detail-value" th:text="${prueba.periodo}"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Botones de acción -->
+                        <div class="result-actions">
+                            <button class="btn btn-outline btn-sm" th:attr="onclick='descargarCertificado(' + ${prueba.id} + ')'">
+                                <i class="fas fa-download"></i> Descargar Certificado
+                            </button>
+                            <button class="btn btn-outline btn-sm" th:attr="onclick='verGraficas(' + ${prueba.id} + ')'">
+                                <i class="fas fa-chart-bar"></i> Ver Gráficas
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mensaje si no hay resultados -->
+                <div th:if="${pruebasSaberPro.isEmpty() and pruebasSaberTT.isEmpty()}">
+                    <div class="result-item no-results">
+                        <h3>📭 Aún no tienes resultados</h3>
+                        <p>No se han registrado resultados de pruebas Saber Pro o Saber T&T para tu cuenta.</p>
+                        <ul class="no-results-tips">
+                            <li>✅ Las pruebas aparecen automáticamente después de ser calificadas</li>
+                            <li>📅 Los resultados se publican según el calendario académico</li>
+                            <li>🔍 Si crees que hay un error, contacta con coordinación académica</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evolución de Rendimiento -->
+            <div class="uts-card mt-2">
+                <div class="card-header">
+                    <h2 class="card-title">📈 Evolución de tu Rendimiento</h2>
+                </div>
+                
+                <div th:if="${not evolucionPuntajes.isEmpty()}">
+                    <div class="evolution-table-container">
+                        <table class="evolution-table">
+                            <thead>
+                                <tr>
+                                    <th>Periodo</th>
+                                    <th>Tipo Prueba</th>
+                                    <th>Puntaje</th>
+                                    <th>Nivel</th>
+                                    <th>Evaluación</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="evolucion : ${evolucionPuntajes}">
+                                    <td th:text="${evolucion[0]}"></td>
+                                    <td th:text="${evolucion[2]}"></td>
+                                    <td th:text="${evolucion[1]} + ' pts'"></td>
+                                    <td>
+                                        <!-- Niveles para Saber Pro -->
+                                        <span th:if="${evolucion[1] >= 191 and evolucion[1] <= 300 and evolucion[2] == 'SABER_PRO'}" class="nivel-badge nivel-4">N4</span>
+                                        <span th:if="${evolucion[1] >= 156 and evolucion[1] <= 190 and evolucion[2] == 'SABER_PRO'}" class="nivel-badge nivel-3">N3</span>
+                                        <span th:if="${evolucion[1] >= 126 and evolucion[1] <= 155 and evolucion[2] == 'SABER_PRO'}" class="nivel-badge nivel-2">N2</span>
+                                        <span th:if="${evolucion[1] >= 0 and evolucion[1] <= 125 and evolucion[2] == 'SABER_PRO'}" class="nivel-badge nivel-1">N1</span>
+                                        
+                                        <!-- Niveles para Saber T&T -->
+                                        <span th:if="${evolucion[1] >= 128 and evolucion[1] <= 200 and evolucion[2] == 'SABER_TYT'}" class="nivel-badge nivel-4">N4</span>
+                                        <span th:if="${evolucion[1] >= 104 and evolucion[1] <= 127 and evolucion[2] == 'SABER_TYT'}" class="nivel-badge nivel-3">N3</span>
+                                        <span th:if="${evolucion[1] >= 84 and evolucion[1] <= 103 and evolucion[2] == 'SABER_TYT'}" class="nivel-badge nivel-2">N2</span>
+                                        <span th:if="${evolucion[1] >= 0 and evolucion[1] <= 83 and evolucion[2] == 'SABER_TYT'}" class="nivel-badge nivel-1">N1</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${evolucion[1] >= 240 and evolucion[2] == 'SABER_PRO'}" class="badge-success">Excelente</span>
+                                        <span th:if="${evolucion[1] >= 180 and evolucion[2] == 'SABER_PRO' and evolucion[1] < 240}" class="badge-warning">Bueno</span>
+                                        <span th:if="${evolucion[1] < 180 and evolucion[2] == 'SABER_PRO'}" class="badge-danger">Regular</span>
+                                        <span th:if="${evolucion[1] >= 170 and evolucion[2] == 'SABER_TYT'}" class="badge-success">Excelente</span>
+                                        <span th:if="${evolucion[1] >= 120 and evolucion[2] == 'SABER_TYT' and evolucion[1] < 170}" class="badge-warning">Bueno</span>
+                                        <span th:if="${evolucion[1] < 120 and evolucion[2] == 'SABER_TYT'}" class="badge-danger">Regular</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div th:if="${mejoria > 0}" class="evolution-summary text-success">
+                        <i class="fas fa-arrow-up"></i>
+                        <strong>¡Enhorabuena!</strong> Tu rendimiento ha mejorado un <span th:text="${mejoria}"></span>% respecto a tu prueba anterior.
+                    </div>
+                    <div th:if="${mejoria <= 0}" class="evolution-summary text-info">
+                        <i class="fas fa-chart-line"></i>
+                        <strong>Rendimiento estable.</strong> Sigue esforzándote para mejorar tus resultados.
+                    </div>
+                </div>
+                
+                <div th:if="${evolucionPuntajes.isEmpty()}" class="evolution-placeholder">
+                    <i class="fas fa-chart-bar"></i>
+                    <p>Realiza al menos 2 pruebas para ver tu evolución</p>
+                    <span>Actualmente tienes <strong th:text="${totalPruebas}"></strong> prueba(s) registrada(s)</span>
+                </div>
+            </div>
+
+            <!-- Leyenda de Niveles -->
+            <div class="uts-card mt-2">
+                <div class="card-header">
+                    <h2 class="card-title">📖 Leyenda de Niveles</h2>
+                </div>
+                <div class="leyenda-niveles">
+                    <div class="nivel-leyenda-item">
+                        <span class="nivel-badge nivel-4">Nivel 4</span>
+                        <span class="leyenda-descripcion">Avanzado - Excelente desempeño</span>
+                    </div>
+                    <div class="nivel-leyenda-item">
+                        <span class="nivel-badge nivel-3">Nivel 3</span>
+                        <span class="leyenda-descripcion">Satisfactorio - Buen desempeño</span>
+                    </div>
+                    <div class="nivel-leyenda-item">
+                        <span class="nivel-badge nivel-2">Nivel 2</span>
+                        <span class="leyenda-descripcion">Básico - Desempeño mínimo</span>
+                    </div>
+                    <div class="nivel-leyenda-item">
+                        <span class="nivel-badge nivel-1">Nivel 1</span>
+                        <span class="leyenda-descripcion">Por debajo del básico - Necesita mejorar</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    <script th:src="@{/js/common.js}"></script>
+    <script th:src="@{/js/resultadosestudiante.js}"></script>
+
+    <style>
+        .results-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .result-item {
+            background: var(--gris-claro);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-left: 4px solid var(--verde-lima);
+            transition: all 0.3s ease;
+        }
+        
+        .result-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .result-item.no-results {
+            border-left-color: var(--gris-medio);
+            text-align: center;
+            background: #f8f9fa;
+        }
+        
+        .no-results-tips {
+            text-align: left;
+            margin: 1rem 0 0 0;
+            padding-left: 1.5rem;
+            list-style: none;
+        }
+        
+        .no-results-tips li {
+            margin-bottom: 0.5rem;
+            color: var(--texto-claro);
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .result-info h3 {
+            margin: 0 0 0.5rem 0;
+            color: var(--texto-oscuro);
+        }
+        
+        .result-date {
+            color: var(--texto-claro);
+            font-size: 0.9rem;
+        }
+        
+        .result-score {
+            text-align: right;
+        }
+        
+        .score-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+        
+        .score-excellent {
+            background: #28a745;
+        }
+        
+        .score-good {
+            background: #17a2b8;
+        }
+        
+        .score-average {
+            background: #ffc107;
+            color: var(--texto-oscuro);
+        }
+        
+        .score-status {
+            display: block;
+            font-size: 0.9rem;
+        }
+        
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--gris-medio);
+        }
+        
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        
+        .competencia-item {
+            background: #f8f9fa;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin: 0.25rem 0;
+        }
+        
+        .detail-label {
+            color: var(--texto-claro);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .detail-value {
+            color: var(--texto-oscuro);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        /* Estilos para niveles */
+        .nivel-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .nivel-4 {
+            background: #28a745;
+        }
+        
+        .nivel-3 {
+            background: #17a2b8;
+        }
+        
+        .nivel-2 {
+            background: #ffc107;
+            color: var(--texto-oscuro);
+        }
+        
+        .nivel-1 {
+            background: #dc3545;
+        }
+        
+        .nivel-mini {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .result-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .evolution-table-container {
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }
+        
+        .evolution-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .evolution-table th,
+        .evolution-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--gris-medio);
+        }
+        
+        .evolution-table th {
+            background: var(--gris-claro);
+            font-weight: 600;
+            color: var(--texto-oscuro);
+        }
+        
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        
+        .evolution-summary {
+            padding: 1rem;
+            background: var(--gris-claro);
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 1rem;
+        }
+        
+        .evolution-placeholder {
+            text-align: center;
+            padding: 3rem;
+            color: var(--texto-claro);
+        }
+        
+        .evolution-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .leyenda-niveles {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+        }
+        
+        .nivel-leyenda-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        
+        .nivel-leyenda-item:nth-child(1) { border-left-color: #28a745; }
+        .nivel-leyenda-item:nth-child(2) { border-left-color: #17a2b8; }
+        .nivel-leyenda-item:nth-child(3) { border-left-color: #ffc107; }
+        .nivel-leyenda-item:nth-child(4) { border-left-color: #dc3545; }
+        
+        .leyenda-descripcion {
+            color: var(--texto-oscuro);
+            font-size: 0.9rem;
+        }
+        
+        .text-success {
+            color: #28a745 !important;
+        }
+        
+        .text-danger {
+            color: #dc3545 !important;
+        }
+        
+        .text-warning {
+            color: #ffc107 !important;
+        }
+        
+        .text-info {
+            color: #17a2b8 !important;
+        }
+    </style>
+</body>
+</html>

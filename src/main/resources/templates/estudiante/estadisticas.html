@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Estadísticas - Estudiante</title>
+    <link th:href="@{/css/uts-theme.css}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Chart.js para gráficas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    
+    <div class="main-layout">
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        
+        <main class="main-content">
+            <!-- Header -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h1 class="card-title">📈 Mis Estadísticas</h1>
+                    <p>Análisis detallado de tu rendimiento académico</p>
+                </div>
+            </div>
+
+            <!-- Resumen Estadístico CON DATOS REALES -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-number" th:text="${promedio} + '%'">85%</div>
+                    <div class="stat-label">Promedio Actual</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-number" th:text="${mejoria != null} ? ' +' + ${mejoria} + '%' : 'N/A'">+15%</div>
+                    <div class="stat-label">Mejoría Anual</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-number" th:text="${posicionPrograma != null} ? '#' + ${posicionPrograma} : 'N/A'">#15</div>
+                    <div class="stat-label">Posición Programa</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-number" th:text="${pruebasAprobadas} + '/' + ${totalPruebas}">
+                        92%
+                    </div>
+                    <div class="stat-label">Pruebas Aprobadas</div>
+                </div>
+            </div>
+
+            <!-- Evolución del Rendimiento -->
+            <div class="uts-card">
+                <div class="card-header">
+                    <h2 class="card-title">📊 Evolución de tu Rendimiento</h2>
+                </div>
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>Progreso Académico</h3>
+                        <div class="chart-container">
+                            <canvas id="evolucionChart" width="400" height="250"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <h3>Distribución de Competencias</h3>
+                        <div class="chart-container">
+                            <canvas id="competenciasChart" width="400" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparativa con el Programa -->
+            <div class="uts-card mt-2">
+                <div class="card-header">
+                    <h2 class="card-title">🎓 Comparativa con tu Programa</h2>
+                </div>
+                <div class="comparison-grid">
+                    <div class="comparison-item">
+                        <h4>Tu Posición</h4>
+                        <div class="position-display">
+                            <span class="position-number" th:text="${posicionPrograma != null} ? ${posicionPrograma} : 'N/A'">15</span>
+                            <span class="position-total">de <span th:text="${totalEstudiantesPrograma != null} ? ${totalEstudiantesPrograma} : 'N/A'">120</span> estudiantes</span>
+                        </div>
+                        <div class="percentile">
+                            <span class="percentile-badge" th:text="'Percentil ' + ${percentil != null} ? ${percentil} : 'N/A'">Percentil 88</span>
+                            <p th:if="${percentil != null}" th:text="'Estás en el top ' + (100 - ${percentil}) + '% de tu programa'">
+                                Estás en el top 12% de tu programa
+                            </p>
+                            <p th:unless="${percentil != null}">Sin datos de percentil</p>
+                        </div>
+                    </div>
+
+                    <div class="comparison-item">
+                        <h4>Promedio del Programa</h4>
+                        <div class="avg-comparison">
+                            <div class="score-comparison">
+                                <span class="your-score" th:text="${promedio} + '%'">85%</span>
+                                <span class="vs">vs</span>
+                                <span class="program-avg" th:text="${promedioPrograma != null} ? ${promedioPrograma} + '%' : 'N/A'">76%</span>
+                            </div>
+                            <div class="difference" th:classappend="${diferenciaPromedio > 0} ? 'positive' : 'negative'">
+                                <i class="fas" th:classappend="${diferenciaPromedio > 0} ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+                                <span th:if="${diferenciaPromedio != null}" 
+                                      th:text="${#numbers.formatInteger(Math.abs(diferenciaPromedio), 0, 'COMMA')} + '% ' + (${diferenciaPromedio} > 0 ? 'sobre' : 'bajo') + ' el promedio'">
+                                    +9% sobre el promedio
+                                </span>
+                                <span th:unless="${diferenciaPromedio != null}">Sin datos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="comparison-item">
+                        <h4>Rendimiento por Pruebas</h4>
+                        <div class="subject-stats">
+                            <div class="subject-item" th:each="prueba, stat : ${ultimasPruebas}" th:if="${stat.index < 3}">
+                                <span class="subject-name" th:text="${prueba.tipoPrueba}">Programación</span>
+                                <span class="subject-score" 
+                                      th:classappend="${prueba.puntajeGlobal >= 200} ? 'excellent' : (${prueba.puntajeGlobal >= 150} ? 'good' : 'average')"
+                                      th:text="${prueba.puntajeGlobal} + ' pts'">92%</span>
+                            </div>
+                            <div class="subject-item" th:if="${#lists.isEmpty(ultimasPruebas)}">
+                                <span class="subject-name">Sin pruebas registradas</span>
+                                <span class="subject-score average">N/A</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metas y Recomendaciones -->
+            <div class="uts-card mt-2">
+                <div class="card-header">
+                    <h2 class="card-title">🎯 Metas y Recomendaciones</h2>
+                </div>
+                <div class="goals-container">
+                    <div class="goal-item">
+                        <div class="goal-info">
+                            <h4>Mejorar promedio general</h4>
+                            <p>Alcanza un promedio superior al 85%</p>
+                        </div>
+                        <div class="goal-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" th:style="'width: ' + ${(promedio / 85) * 100} + '%;'"></div>
+                            </div>
+                            <div class="progress-text" th:text="${promedio} + '% / 85%'">80% / 85%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="goal-item">
+                        <div class="goal-info">
+                            <h4>Mantener posición destacada</h4>
+                            <p>Conservar posición en el top 20 del programa</p>
+                        </div>
+                        <div class="goal-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" 
+                                     th:style="'width: ' + (${posicionPrograma != null} ? ${#numbers.formatInteger(Math.min(100, ((20 - posicionPrograma + 1) / 20) * 100), 0, 'COMMA')} : 0) + '%;'"></div>
+                            </div>
+                            <div class="progress-text" 
+                                 th:text="${posicionPrograma != null} ? 'Posición #' + ${posicionPrograma} : 'Sin datos'">Posición #15</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="recommendations-list mt-2">
+                    <div class="recommendation-item">
+                        <div class="rec-icon">💡</div>
+                        <div class="rec-content">
+                            <h4>Fortalece competencias cuantitativas</h4>
+                            <p th:if="${puntajeCuantitativo != null}" 
+                               th:text="'Tu puntaje en áreas cuantitativas es ' + ${puntajeCuantitativo} + ' puntos. Practica ejercicios matemáticos regularmente.'">
+                                Tu puntaje en áreas cuantitativas es 82 puntos. Practica ejercicios matemáticos regularmente.
+                            </p>
+                            <p th:unless="${puntajeCuantitativo != null}">
+                                Practica ejercicios matemáticos regularmente para mejorar tus competencias cuantitativas.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-item">
+                        <div class="rec-icon">📚</div>
+                        <div class="rec-content">
+                            <h4>Preparación para próximas pruebas</h4>
+                            <p th:if="${pruebasAprobadas != null and totalPruebas != null}">
+                                <span th:if="${totalPruebas > 0}">
+                                    Has aprobado <span th:text="${pruebasAprobadas}"></span> de <span th:text="${totalPruebas}"></span> pruebas.
+                                    <span th:if="${(pruebasAprobadas / totalPruebas) >= 0.8}">¡Excelente rendimiento!</span>
+                                    <span th:unless="${(pruebasAprobadas / totalPruebas) >= 0.8}">Puedes mejorar tu tasa de aprobación.</span>
+                                </span>
+                                <span th:unless="${totalPruebas > 0}">No tienes pruebas registradas aún.</span>
+                            </p>
+                            <p th:unless="${pruebasAprobadas != null and totalPruebas != null}">
+                                Continúa con tu preparación para mantener tu rendimiento actual.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+    
+    <div th:replace="~{fragments/footer :: footer}"></div>
+    <script th:src="@{/js/common.js}"></script>
+    <script th:src="@{/js/estadisticasestudiante.js}"></script>
+</body>
+
+<style>
+    .charts-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .chart-card {
+        background: var(--gris-claro);
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+    }
+    
+    .chart-card h3 {
+        margin: 0 0 1rem 0;
+        color: var(--texto-oscuro);
+    }
+    
+    .chart-container {
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .comparison-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .comparison-item {
+        background: var(--gris-claro);
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+    }
+    
+    .comparison-item h4 {
+        margin: 0 0 1rem 0;
+        color: var(--texto-oscuro);
+    }
+    
+    .position-display {
+        margin-bottom: 1rem;
+    }
+    
+    .position-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--verde-lima);
+        display: block;
+    }
+    
+    .position-total {
+        color: var(--texto-claro);
+        font-size: 0.9rem;
+    }
+    
+    .percentile-badge {
+        background: var(--verde-lima);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .percentile p {
+        margin: 0.5rem 0 0 0;
+        color: var(--texto-claro);
+        font-size: 0.9rem;
+    }
+    
+    .score-comparison {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .your-score {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--verde-lima);
+    }
+    
+    .vs {
+        color: var(--texto-claro);
+    }
+    
+    .program-avg {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--texto-oscuro);
+    }
+    
+    .difference {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-weight: 600;
+    }
+    
+    .difference.positive {
+        color: #28a745;
+    }
+    
+    .difference.negative {
+        color: #dc3545;
+    }
+    
+    .subject-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .subject-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem;
+        background: white;
+        border-radius: 8px;
+    }
+    
+    .subject-name {
+        color: var(--texto-oscuro);
+    }
+    
+    .subject-score {
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+    }
+    
+    .subject-score.excellent {
+        background: #e8f5e8;
+        color: #2e7d32;
+    }
+    
+    .subject-score.good {
+        background: #e3f2fd;
+        color: #1565c0;
+    }
+    
+    .subject-score.average {
+        background: #fff3e0;
+        color: #ef6c00;
+    }
+    
+    .goals-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .goal-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    
+    .goal-info {
+        flex: 1;
+    }
+    
+    .goal-info h4 {
+        margin: 0 0 0.25rem 0;
+        color: var(--texto-oscuro);
+    }
+    
+    .goal-info p {
+        margin: 0;
+        color: var(--texto-claro);
+        font-size: 0.9rem;
+    }
+    
+    .goal-progress {
+        min-width: 200px;
+        text-align: right;
+    }
+    
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: var(--gris-medio);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: var(--verde-lima);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+    
+    .progress-text {
+        font-size: 0.8rem;
+        color: var(--texto-claro);
+    }
+    
+    .recommendations-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .recommendation-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--gris-claro);
+        border-radius: 8px;
+    }
+    
+    .rec-icon {
+        font-size: 1.5rem;
+        width: 40px;
+        text-align: center;
+    }
+    
+    .rec-content h4 {
+        margin: 0 0 0.5rem 0;
+        color: var(--texto-oscuro);
+    }
+    
+    .rec-content p {
+        margin: 0;
+        color: var(--texto-claro);
+        font-size: 0.9rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .charts-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .goal-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .goal-progress {
+            min-width: 100%;
+        }
+    }
+</style>
+</html>
